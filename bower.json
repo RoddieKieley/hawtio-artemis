@@ -1,0 +1,53 @@
+{
+  "name": "hawtio-artemis",
+  "version": "0.1.0",
+  "main": [
+    "dist/hawtio-artemis.js",
+    "dist/ui-bootstrap.js",
+    "dist/ui-bootstrap-tpls.js",
+    "dist/transition.js",
+    "dist/dialog.js",
+    "dist/modal.js"
+  ],
+  "ignore": [
+    ".bowerrc",
+    ".jshintrc",
+    "node_modules",
+    "libs",
+    "gulpfile.js",
+    "karma.conf.js",
+    "index.html",
+    "package.json",
+    "templates",
+    "hawtio-artemis.js",
+    "!dist/hawtio-artemis.js",
+    "test"
+  ],
+  "dependencies": {
+    "patternfly": "3.19.0",
+    "hawtio-core": "~2.0.0",
+    "hawtio-core-navigation": "~2.0.0",
+    "hawtio-utilities": "~2.0.0",
+    "hawtio-integration": "~2.2.0",
+    "hawtio-preferences": "~2.0.0",
+    "angular": "1.5.11",
+    "angular-sanitize": "1.5.11",
+    "codemirror": "5.19.0",
+    "angular-bootstrap": "~0.13.0"
+  },
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.js"
+      ]
+    }
+  },
+  "resolutions": {
+    "jquery": "~2.1.0"
+  },
+  "devDependencies": {
+    "bootstrap": "~3.3.1",
+    "patternfly": "~1.1.2"
+  }
+}
