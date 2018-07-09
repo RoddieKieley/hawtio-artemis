@@ -49,6 +49,9 @@ var ARTEMIS = (function(ARTEMIS) {
       });
    };
 
+   ARTEMIS.module.controller("ARTEMIS.PreferencesController", ARTEMIS.PreferencesController);
+
    return ARTEMIS;
 
 }(ARTEMIS || {}));
+

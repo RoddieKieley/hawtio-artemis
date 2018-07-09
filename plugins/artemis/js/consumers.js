@@ -145,7 +145,7 @@ var ARTEMIS = (function(ARTEMIS) {
                    mbean: mbean,
                    operation: 'closeConsumerWithID(java.lang.String, java.lang.String)',
                    arguments: [sessionID, consumerID] },
-                   onSuccess($scope.loadTable(), { error: function (response) {
+                   Core.onSuccess($scope.loadTable(), { error: function (response) {
                       Core.defaultJolokiaErrorHandler("Could not close consumer: " + response);
                    }}));
             }
@@ -216,7 +216,7 @@ var ARTEMIS = (function(ARTEMIS) {
             } else if (mbean) {
                 var filter = JSON.stringify($scope.filter.values);
                 console.log("Filter string: " + filter);
-                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
+                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
         $scope.selectGridRow = function () {
@@ -270,3 +270,5 @@ var ARTEMIS = (function(ARTEMIS) {
     };
     return ARTEMIS;
 } (ARTEMIS || {}));
+
+ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);

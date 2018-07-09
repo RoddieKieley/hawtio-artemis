@@ -18,12 +18,14 @@
 var ARTEMIS;
 (function (ARTEMIS) {
     ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ["$scope", function ($scope) {
+    //ARTEMIS.TreeHeaderController = function ($scope) {
         $scope.expandAll = function () {
             Tree.expandAll("#artemistree");
         };
         $scope.contractAll = function () {
             Tree.contractAll("#artemistree");
         };
+    //};
     }]);
     ARTEMIS.module.controller("ARTEMIS.TreeController", ["$scope", "$location", "workspace", "localStorage", function ($scope, $location, workspace, localStorage) {
         var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
@@ -73,4 +75,7 @@ var ARTEMIS;
             }, true);
         }
     }]);
+
+    //ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ARTEMIS.TreeHeaderController);
+
 })(ARTEMIS || (ARTEMIS = {}));

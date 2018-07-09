@@ -20,6 +20,7 @@
 var ARTEMIS = (function(ARTEMIS) {
 
     ARTEMIS.AddressesController = function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
+    //ARTEMIS.module.controller("ARTEMIS.AddressesController", ["$scope", "$location", "workspace", "ARTEMISService", "jolokia", "localStorage", "artemisAddress", function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
 
         var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
 
@@ -29,6 +30,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
         var objectType = "address";
         var method = 'listAddresses(java.lang.String, int, int)';
+        //var method = 'listAddresses(java.lang.String)';
         var attributes = [
            {
                field: 'manage',
@@ -140,6 +142,7 @@ var ARTEMIS = (function(ARTEMIS) {
             sortInfo: $scope.sortOptions,
             useExternalSorting: true,
         };
+
         $scope.refresh = function () {
             refreshed = true;
             $scope.loadTable();
@@ -160,7 +163,8 @@ var ARTEMIS = (function(ARTEMIS) {
             } else if (mbean) {
                 var filter = JSON.stringify($scope.filter.values);
                 console.log("Filter string: " + filter);
-                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
+                //jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
+                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
         function onError() {
@@ -170,12 +174,17 @@ var ARTEMIS = (function(ARTEMIS) {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
         }
         function populateTable(response) {
+            console.log("populateTable with response: " + response);
             var data = JSON.parse(response.value);
+            console.log("Got data: ", data);
             $scope.objects = [];
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+
             $scope.totalServerItems = data["count"];
+            console.log("totalServerItems: ", $scope.totalServerItems);
+            $scope.gridOptions.pagingOptions.currentPage = 1;
             if (refreshed == true) {
                 $scope.gridOptions.pagingOptions.currentPage = 1;
                 refreshed = false;
@@ -207,5 +216,9 @@ var ARTEMIS = (function(ARTEMIS) {
         };
         $scope.refresh();
     };
+    //}]);
+
     return ARTEMIS;
+
 } (ARTEMIS || {}));
+

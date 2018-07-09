@@ -300,7 +300,7 @@ var ARTEMIS = (function(ARTEMIS) {
          title: function() { return '<i class="icon-book"></i> Addresses' },
          tooltip: function() { return "Manage Addresses" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/addresses"; else return  "/jmx/addresses"; }
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/addresses"; else return  "/artemis/addresses"; }
       });
 
       subLevelTabs.unshift({
@@ -361,6 +361,15 @@ var ARTEMIS = (function(ARTEMIS) {
    function isQueue(workspace, domain) {
       return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
    }
+
+   ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
+   ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
+   //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
+   //ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
+   //ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
+   //ARTEMIS.module.controller("ARTEMIS.ProducersController", ARTEMIS.ProducersController);
+   //ARTEMIS.module.controller("ARTEMIS.QueuesController", ARTEMIS.QueuesController);
+   //ARTEMIS.module.controller("ARTEMIS.DiagramController", ARTEMIS.DiagramController);
 
    return ARTEMIS;
 }(ARTEMIS || {}));

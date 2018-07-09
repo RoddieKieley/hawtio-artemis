@@ -17,6 +17,7 @@
 /**
  * @module ARTEMIS
  */
+
 var ARTEMIS = (function(ARTEMIS) {
 
   ARTEMIS.SERVER = 'Server Messages';
