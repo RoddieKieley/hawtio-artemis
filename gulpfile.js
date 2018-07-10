@@ -3,7 +3,7 @@ var gulp = require('gulp'),
     gulpLoadPlugins = require('gulp-load-plugins'),
     uri = require('URIjs'),
     s = require('underscore.string'),
-    hawtio = require('hawtio-node-backend');
+    hawtio = require('@hawtio/node-backend');
 
 var plugins = gulpLoadPlugins({ lazy: false });
 var pkg = require('./package.json');
