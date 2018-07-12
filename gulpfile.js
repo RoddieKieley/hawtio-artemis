@@ -9,8 +9,6 @@ var plugins = gulpLoadPlugins({ lazy: false });
 var pkg = require('./package.json');
 
 var config = {
-  //src: 'plugins/**/*.js',
-  //src: ['plugins/**/*.js', './templates.js'],
   src:
   ['plugins/artemis/js/jmsHeaderSchema.js',
     'plugins/artemis/js/artemisPlugin.js',
@@ -21,20 +19,15 @@ var config = {
     'plugins/artemis/js/preferences.js',
     'plugins/artemis/js/address.js',
     'plugins/artemis/js/addresses.js',
-    //'plugins/artemis/js/artemisHelpers.js',
-    //'plugins/artemis/js/artemisPlugin.js',
-    //'plugins/artemis/js/artemisService.js',
     'plugins/artemis/js/brokerDiagram.js',
     'plugins/artemis/js/browse.js',
     'plugins/artemis/js/connections.js',
     'plugins/artemis/js/consumers.js',
-    //'plugins/artemis/js/jmsHeaderSchema.js',
     'plugins/artemis/js/producers.js',
     'plugins/artemis/js/queue.js',
     'plugins/artemis/js/queues.js',
     'plugins/artemis/js/send.js',
     'plugins/artemis/js/sessions.js',
-    //'plugins/artemis/js/tree.js',
     './templates.js'],
   templates: 'plugins/**/*.html',
   js: pkg.name + '.js',
@@ -62,8 +55,6 @@ gulp.task('templates', function() {
 });
 
 gulp.task('concat', ['templates'], function() {
-  //console.log("config.src is ", config.src);
-  //return gulp.src([config.src, './templates.js'])
   return gulp.src(config.src)
     .pipe(plugins.concat(config.js))
     .pipe(gulp.dest('./dist/'));
