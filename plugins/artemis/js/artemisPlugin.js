@@ -87,6 +87,15 @@ var ARTEMIS = (function(ARTEMIS) {
     */
    ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngResource', 'hawtio-compat.dialog', 'hawtio-compat.transition', 'hawtio-core', 'camel', 'hawtio-ui']);
 
+   //https://code.angularjs.org/1.5.11/docs/guide/migration#migrating-from-1-2-to-1-3
+    angular.module(ARTEMIS.pluginName).config(['$controllerProvider', function($controllerProvider) {
+      // this option might be handy for migrating old apps, but please don't use it
+      // in new ones!
+      $controllerProvider.allowGlobals();
+    }]);
+
+
+
    // set up the routing for this plugin, these are referenced by the subleveltabs added below
    ARTEMIS.module.config(function($routeProvider) {
       $routeProvider
@@ -362,8 +371,8 @@ var ARTEMIS = (function(ARTEMIS) {
       return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
    }
 
-   ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
-   ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
+   //ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
+   //ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
    //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
    //ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
    //ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
