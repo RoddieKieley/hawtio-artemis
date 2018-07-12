@@ -97,6 +97,7 @@ var ARTEMIS = (function(ARTEMIS) {
                  width: '10%'
               }
           ],
+          primaryKeyFn: function (entity) { return entity.messageID; },
           afterSelectionChange: afterSelectionChange
        };
        $scope.showMessageDetails = false;
@@ -216,7 +217,7 @@ var ARTEMIS = (function(ARTEMIS) {
              $scope.allMessages = data;
           }
           angular.forEach($scope.allMessages, function (message) {
-             message.headerHtml = createHeaderHtml(message);
+             //message.headerHtml = createHeaderHtml(message);
              message.bodyText = createBodyText(message);
           });
           filterMessages($scope.gridOptions.filterOptions.filterText);
@@ -304,6 +305,7 @@ var ARTEMIS = (function(ARTEMIS) {
           }
 
           var propertiesKeys = Object.extended(properties).keys().sort(sort);
+          var propertiesKeys = properties.keys;
           var jmsHeaders = headerKeys.filter(function (key) {
              return key.startsWith("JMS");
           }).sort(sort);
@@ -335,9 +337,9 @@ var ARTEMIS = (function(ARTEMIS) {
        function createHeaders(row) {
           var answer = {};
           angular.forEach(row, function (value, key) {
-             if (!ignoreColumns.any(key) && !flattenColumns.any(key)) {
+             //if (!ignoreColumns.any(key) && !flattenColumns.any(key)) {
                 answer[Core.escapeHtml(key)] = Core.escapeHtml(value);
-             }
+             //}
           });
           return answer;
        }
@@ -346,11 +348,11 @@ var ARTEMIS = (function(ARTEMIS) {
           ARTEMIS.log.debug("properties: ", row);
           var answer = {};
           angular.forEach(row, function (value, key) {
-             if (!ignoreColumns.any(key) && flattenColumns.any(key)) {
+             //if (!ignoreColumns.any(key) && flattenColumns.any(key)) {
                 angular.forEach(value, function (v2, k2) {
                    answer['<span class="green">' + key.replace('Properties', ' Property') + '</span> - ' + Core.escapeHtml(k2)] = Core.escapeHtml(v2);
                 });
-             }
+             //}
           });
           return answer;
        }
