@@ -85,9 +85,9 @@ var ARTEMIS = (function(ARTEMIS) {
                 if (selection && jolokia && entries) {
                     var domain = selection.domain;
                     var name = entries["address"];
-                    // TODO: Find replacement
-                    //name = name.unescapeHTML();
-                    name = Core.unescapeHTML(name);
+                    name = name.replace(/['"]+/g, '');
+                    name = ARTEMISService.artemisConsole.ownUnescape(name);
+                    ARTEMIS.log.info(name);
                     if (name.charAt(0) === '"' && name.charAt(name.length -1) === '"')
                     {
                         name = name.substr(1,name.length -2);

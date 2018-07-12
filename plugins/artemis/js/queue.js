@@ -124,9 +124,9 @@ var ARTEMIS = (function(ARTEMIS) {
             if (mbean) {
                 if (selection && jolokia && entries) {
                     var name = entries["Destination"] || entries["destinationName"] || selection.title;
-                    // TODO: Review if this is required or not
-                    //name = name.unescapeHTML();
-                    name = Core.unescapeHTML(name);
+                    name = name.replace(/['"]+/g, '');
+                    name = ARTEMISService.artemisConsole.ownUnescape(name);
+                    ARTEMIS.log.info(name);
                     var operation = "purge()";
                     $scope.message = "Purged queue " + name;
                     ARTEMISService.artemisConsole.purgeQueue(mbean, jolokia, Core.onSuccess(deleteSuccess));

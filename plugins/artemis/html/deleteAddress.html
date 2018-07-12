@@ -28,7 +28,7 @@
   <div class="row-fluid">
     <div class="span4">
       <div class="control-group">
-        <button type="submit" class="btn btn-warning" ng-click="deleteDialog = true">Delete address '{{name().unescapeHTML()}}'</button>
+        <button type="submit" class="btn btn-warning" ng-click="deleteDialog = true">Delete address '{{name()}}'</button>
         <label>This will remove the address completely.</label>
       </div>
     </div>
@@ -38,7 +38,7 @@
        ok-button-text="Delete"
        on-ok="deleteAddress()">
     <div class="dialog-body">
-      <p>You are about to delete the <b>{{name().unescapeHTML()}}</b> address</p>
+      <p>You are about to delete the <b>{{name()}}</b> address</p>
       <p>This operation cannot be undone so please be careful.</p>
     </div>
   </div>
