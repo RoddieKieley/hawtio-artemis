@@ -1944,6 +1944,9 @@ var ARTEMIS = (function(ARTEMIS) {
        $scope.deleteDialog = false;
        $scope.moveDialog = false;
        $scope.gridOptions = {
+          $gridScope: {
+              allSelected: false
+          },
           pagingOptions: $scope.pagingOptions,
           enablePaging: true,
           totalServerItems: 'totalServerItems',
