@@ -79,9 +79,6 @@ function ArtemisConsole() {
 
 function getServerAttributes() {
    var console = new ArtemisConsole();
-   return console.getVersion(new Jolokia("http://localhost:8161/jolokia/"));
+   //return console.getVersion(new Jolokia("http://localhost:8161/jolokia/"));
+   return console.getVersion(new Jolokia("http://localhost:8778/jolokia/"));
 }
-
-
-
-
