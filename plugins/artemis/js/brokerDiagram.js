@@ -20,7 +20,7 @@
 var ARTEMIS = (function(ARTEMIS) {
    ARTEMIS.BrokerDiagramController = function ($scope, $compile, $location, localStorage, ARTEMISService, jolokia, workspace, $routeParams) {
 
-      Fabric.initScope($scope, $location, jolokia, workspace);
+      //Fabric.initScope($scope, $location, jolokia, workspace);
       var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
 
       $scope.selectedNode = null;
@@ -155,7 +155,7 @@ var ARTEMIS = (function(ARTEMIS) {
                $scope.unregisterFn = Core.register(nodeJolokia, $scope, {
                   type: 'read',
                   mbean: mbean
-               }, onSuccess(renderNodeAttributes, {
+               }, Core.onSuccess(renderNodeAttributes, {
                   error: function (response) {
                      // probably we've got a wrong mbean name?
                      // so lets render at least
@@ -215,12 +215,12 @@ var ARTEMIS = (function(ARTEMIS) {
             var brokerProperty = null;
             if (brokerName) {
                var brokerHtml = '<a target="broker" ng-click="connectToBroker()">' + '<img title="Apache Artemis" src="img/icons/messagebroker.svg"> ' + brokerName + '</a>';
-               if (version && profile) {
-                  var brokerLink = Fabric.brokerConfigLink(workspace, jolokia, localStorage, version, profile, brokerName);
-                  if (brokerLink) {
-                     brokerHtml += ' <a title="configuration settings" target="brokerConfig" href="' + brokerLink + '"><i class="icon-tasks"></i></a>';
-                  }
-               }
+//               if (version && profile) {
+//                  var brokerLink = Fabric.brokerConfigLink(workspace, jolokia, localStorage, version, profile, brokerName);
+//                  if (brokerLink) {
+//                     brokerHtml += ' <a title="configuration settings" target="brokerConfig" href="' + brokerLink + '"><i class="icon-tasks"></i></a>';
+//                  }
+//               }
                var html = $compile(brokerHtml)($scope);
                brokerProperty = {key: "Broker", value: html};
                if (!isBroker) {
@@ -300,7 +300,7 @@ var ARTEMIS = (function(ARTEMIS) {
             containerId: container
          };
          var brokers = [];
-         jolokia.search(artemisJmxDomain + ":broker=*", onSuccess(function (response) {
+         jolokia.search(artemisJmxDomain + ":broker=*", Core.onSuccess(function (response) {
             angular.forEach(response, function (objectName) {
                var atts = ARTEMISService.artemisConsole.getServerAttributes(jolokia, objectName);
                var val = atts.value;
@@ -335,11 +335,11 @@ var ARTEMIS = (function(ARTEMIS) {
             if (containerJolokia) {
                onContainerJolokia(containerJolokia, container, id, brokers);
             }
-            else {
-               Fabric.containerJolokia(jolokia, id, function (containerJolokia) {
-                  return onContainerJolokia(containerJolokia, container, id, brokers);
-               });
-            }
+//            else {
+//               Fabric.containerJolokia(jolokia, id, function (containerJolokia) {
+//                  return onContainerJolokia(containerJolokia, container, id, brokers);
+//               });
+//            }
          });
          $scope.graph = graphBuilder.buildGraph();
          Core.$apply($scope);
@@ -357,7 +357,7 @@ var ARTEMIS = (function(ARTEMIS) {
       function onContainerJolokia(containerJolokia, container, id, brokers) {
          function createQueues(brokers) {
             if ($scope.viewSettings.queue) {
-               containerJolokia.search(artemisJmxDomain + ":*,subcomponent=queues", onSuccess(function (response) {
+               containerJolokia.search(artemisJmxDomain + ":*,subcomponent=queues", Core.onSuccess(function (response) {
                   angular.forEach(response, function (objectName) {
                      var details = Core.parseMBean(objectName);
                      if (details) {
@@ -383,7 +383,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
          function createAddresses(brokers) {
             if ($scope.viewSettings.address) {
-               containerJolokia.search(artemisJmxDomain + ":*,component=addresses", onSuccess(function (response) {
+               containerJolokia.search(artemisJmxDomain + ":*,component=addresses", Core.onSuccess(function (response) {
                   angular.forEach(response, function (objectName) {
                      var details = Core.parseMBean(objectName);
                      if (details) {
@@ -409,7 +409,7 @@ var ARTEMIS = (function(ARTEMIS) {
                mBean = artemisJmxDomain + ":broker=" + broker.brokerId;
                // find consumers
                if ($scope.viewSettings.consumer) {
-                  ARTEMISService.artemisConsole.getConsumers(mBean, containerJolokia, onSuccess(function (properties) {
+                  ARTEMISService.artemisConsole.getConsumers(mBean, containerJolokia, Core.onSuccess(function (properties) {
                      consumers = properties.value;
                      ARTEMIS.log.info(consumers);
                      angular.forEach(angular.fromJson(consumers), function (consumer) {
@@ -443,7 +443,7 @@ var ARTEMIS = (function(ARTEMIS) {
                // find networks of brokers
                if ($scope.viewSettings.network && $scope.viewSettings.broker) {
 
-                  ARTEMISService.artemisConsole.getRemoteBrokers(mBean, containerJolokia, onSuccess(function (properties) {
+                  ARTEMISService.artemisConsole.getRemoteBrokers(mBean, containerJolokia, Core.onSuccess(function (properties) {
                      remoteBrokers = properties.value;
 
                      ARTEMIS.log.info("remoteBrokers=" + angular.toJson(remoteBrokers))
@@ -496,7 +496,7 @@ var ARTEMIS = (function(ARTEMIS) {
                      }
                   };
                   if (!addressName) {
-                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + addressName + ",subcomponent=queues,routing-type=" + routingType + ",queue=" + queueName + ",*", onSuccess(function (response) {
+                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + addressName + ",subcomponent=queues,routing-type=" + routingType + ",queue=" + queueName + ",*", Core.onSuccess(function (response) {
                         if (response && response.length) {
                            answer.objectName = response[0];
                         }
@@ -527,7 +527,7 @@ var ARTEMIS = (function(ARTEMIS) {
                      }
                   };
                   if (!brokerName) {
-                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + destinationName + ",*", onSuccess(function (response) {
+                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + destinationName + ",*", Core.onSuccess(function (response) {
                         if (response && response.length) {
                            answer.objectName = response[0];
                         }
