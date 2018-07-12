@@ -191,6 +191,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,

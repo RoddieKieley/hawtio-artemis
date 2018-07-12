@@ -45,22 +45,23 @@ var ARTEMIS;
            ARTEMIS.log.info(localStorage['artemisUserName'] + " " + localStorage['artemisPassword']);
             $scope.noCredentials = (Core.isBlank(localStorage['artemisUserName']) || Core.isBlank(localStorage['artemisPassword']));
         };
-        if ($location.path().has('artemis')) {
-            $scope.localStorage = localStorage;
-            $scope.$watch('localStorage.artemisUserName', $scope.checkCredentials);
-            $scope.$watch('localStorage.artemisPassword', $scope.checkCredentials);
-            //prefill if it's a resent
-            if (artemisMessage.message !== null) {
-                $scope.message = artemisMessage.message.bodyText;
-                if (artemisMessage.message.PropertiesText !== null) {
-                    for (var p in artemisMessage.message.StringProperties) {
-                        $scope.headers.push({name: p, value: artemisMessage.message.StringProperties[p]});
-                    }
-                }
-            }
-            // always reset at the end
-            artemisMessage.message = null;
-        }
+        // TODO: Find replacement
+//        if ($location.path().has('artemis')) {
+//            $scope.localStorage = localStorage;
+//            $scope.$watch('localStorage.artemisUserName', $scope.checkCredentials);
+//            $scope.$watch('localStorage.artemisPassword', $scope.checkCredentials);
+//            //prefill if it's a resent
+//            if (artemisMessage.message !== null) {
+//                $scope.message = artemisMessage.message.bodyText;
+//                if (artemisMessage.message.PropertiesText !== null) {
+//                    for (var p in artemisMessage.message.StringProperties) {
+//                        $scope.headers.push({name: p, value: artemisMessage.message.StringProperties[p]});
+//                    }
+//                }
+//            }
+//            // always reset at the end
+//            artemisMessage.message = null;
+//        }
         $scope.openPrefs = function () {
             $location.search('pref', 'Artemis');
             $scope.$emit("hawtioOpenPrefs");
@@ -80,7 +81,8 @@ var ARTEMIS;
                 }
             }
         };
-        $scope.codeMirrorOptions = CodeEditor.createEditorSettings(options);
+        // TODO: Find replacement
+        //$scope.codeMirrorOptions = CodeEditor.createEditorSettings(options);
         $scope.addHeader = function () {
             $scope.headers.push({name: "", value: ""});
             // lets set the focus to the last header
@@ -146,7 +148,7 @@ var ARTEMIS;
                         });
                         log.info("About to send headers: " + JSON.stringify(headers));
                     }
-                    var callback = onSuccess(onSendCompleteFn);
+                    var callback = Core.onSuccess(onSendCompleteFn);
 
                     ARTEMIS.log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     var user = localStorage["artemisUserName"];
@@ -156,7 +158,7 @@ var ARTEMIS;
                         headers = {};
                     }
                     var type = 3;
-                    ARTEMISService.artemisConsole.sendMessage(mbean, jolokia, headers, type, body, durable, user, pwd, callback, onSuccess(callback));
+                    ARTEMISService.artemisConsole.sendMessage(mbean, jolokia, headers, type, body, durable, user, pwd, callback, Core.onSuccess(callback));
 
                 }
             }

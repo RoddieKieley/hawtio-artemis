@@ -252,7 +252,7 @@ var ARTEMIS = (function(ARTEMIS) {
          tooltip: function() { return "Delete an address" },
          index: 4,
          show: function () { return isAddress(workspace, artemisJmxDomain); },
-         href: function () { return "#/artemis/deleteAddress"; }
+         href: function () { return "/artemis/deleteAddress"; }
       });
 
       subLevelTabs.push({
@@ -260,7 +260,7 @@ var ARTEMIS = (function(ARTEMIS) {
          title: function() { return '<i class="icon-plus"></i> Create' },
          tooltip: function() { return "Create a new queue" },
          show: function () { return isAddress(workspace, artemisJmxDomain) },
-         href: function () { return "#/artemis/createQueue" }
+         href: function () { return "/artemis/createQueue" }
       });
 
         subLevelTabs.push({
@@ -268,7 +268,7 @@ var ARTEMIS = (function(ARTEMIS) {
            title: function() { return '<i class="icon-remove"></i> Delete' },
            tooltip: function() { return "Delete or purge this queue" },
            show: function () { return isQueue(workspace, artemisJmxDomain); },
-           href: function () { return "#/artemis/deleteQueue" }
+           href: function () { return "/artemis/deleteQueue" }
         });
 
         subLevelTabs.push({
@@ -371,6 +371,7 @@ var ARTEMIS = (function(ARTEMIS) {
       return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
    }
 
+   // TODO: Review if it is better to do this here or use the angular allowGlobals which is not recommended
    //ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
    //ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
    //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);

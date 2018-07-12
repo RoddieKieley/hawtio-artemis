@@ -30,12 +30,13 @@ var ARTEMIS = (function(ARTEMIS) {
         var objectType = "queue";
         var method = 'listQueues(java.lang.String, int, int)';
         var attributes = [
-            {
-                field: 'manage',
-                displayName: 'manage',
-                width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="navigateToQueueAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToQueueOps(row)">operations</a></div>'
-            },
+            // TODO: Reenable manage column
+//            {
+//                field: 'manage',
+//                displayName: 'manage',
+//                width: '*',
+//                cellTemplate: '<div class="ngCellText"><a ng-click="navigateToQueueAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToQueueOps(row)">operations</a></div>'
+//            },
             {
                 field: 'id',
                 displayName: 'ID',
@@ -235,6 +236,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,

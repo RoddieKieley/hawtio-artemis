@@ -211,7 +211,8 @@ var ARTEMIS = (function(ARTEMIS) {
                   properties.push({key: Core.humanizeValue(k), value: formattedValue});
                }
             });
-            properties = properties.sortBy("key");
+            // TODO: Reenable sortBy
+            //properties = properties.sortBy("key");
             var brokerProperty = null;
             if (brokerName) {
                var brokerHtml = '<a target="broker" ng-click="connectToBroker()">' + '<img title="Apache Artemis" src="img/icons/messagebroker.svg"> ' + brokerName + '</a>';

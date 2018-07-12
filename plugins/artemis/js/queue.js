@@ -84,11 +84,11 @@ var ARTEMIS = (function(ARTEMIS) {
                 $scope.message = "Created queue " + queueName + " durable=" + durable + " filter=" + filter + " on address " + address;
                 if (routingType == 0) {
                     ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "MULTICAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, onSuccess(operationSuccess));
+                    ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "MULTICAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, Core.onSuccess(operationSuccess));
                     ARTEMIS.log.info("executed");
                 } else {
                    ARTEMIS.log.info($scope.message);
-                   ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "ANYCAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, onSuccess(operationSuccess));
+                   ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "ANYCAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, Core.onSuccess(operationSuccess));
                    ARTEMIS.log.info("executed");
                 }
             }
@@ -108,11 +108,11 @@ var ARTEMIS = (function(ARTEMIS) {
                     var operation;
                     if (isQueue) {
                         $scope.message = "Deleted queue " + name;
-                        ARTEMISService.artemisConsole.deleteQueue(mbean, jolokia, name, onSuccess(deleteSuccess));
+                        ARTEMISService.artemisConsole.deleteQueue(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
                     }
                     else {
                         $scope.message = "Deleted topic " + name;
-                        ARTEMISService.artemisConsole.deleteTopic(mbean, jolokia, name, onSuccess(deleteSuccess));
+                        ARTEMISService.artemisConsole.deleteTopic(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
                     }
                 }
             }
@@ -124,10 +124,12 @@ var ARTEMIS = (function(ARTEMIS) {
             if (mbean) {
                 if (selection && jolokia && entries) {
                     var name = entries["Destination"] || entries["destinationName"] || selection.title;
-                    name = name.unescapeHTML();
+                    // TODO: Review if this is required or not
+                    //name = name.unescapeHTML();
+                    name = Core.unescapeHTML(name);
                     var operation = "purge()";
                     $scope.message = "Purged queue " + name;
-                    ARTEMISService.artemisConsole.purgeQueue(mbean, jolokia, onSuccess(deleteSuccess));
+                    ARTEMISService.artemisConsole.purgeQueue(mbean, jolokia, Core.onSuccess(deleteSuccess));
                 }
             }
         };

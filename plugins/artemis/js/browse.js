@@ -140,7 +140,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : moveSuccess;
-                   ARTEMISService.artemisConsole.moveMessage(mbean, jolokia, id, $scope.queueName, onSuccess(callback));
+                   ARTEMISService.artemisConsole.moveMessage(mbean, jolokia, id, $scope.queueName, Core.onSuccess(callback));
                 }
              });
           }
@@ -165,7 +165,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : operationSuccess;
-                   ARTEMISService.artemisConsole.deleteMessage(mbean, jolokia, id, onSuccess(callback));
+                   ARTEMISService.artemisConsole.deleteMessage(mbean, jolokia, id, Core.onSuccess(callback));
                 }
              });
           }
@@ -181,8 +181,8 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : operationSuccess;
-                   jolokia.execute(mbean, operation, id, onSuccess(callback));
-                   ARTEMISService.artemisConsole.retryMessage(mbean, jolokia, id, onSuccess(callback));
+                   jolokia.execute(mbean, operation, id, Core.onSuccess(callback));
+                   ARTEMISService.artemisConsole.retryMessage(mbean, jolokia, id, Core.onSuccess(callback));
                 }
              });
           }
@@ -364,7 +364,8 @@ var ARTEMIS = (function(ARTEMIS) {
           }
           else {
              // in case of refresh
-             var key = location.search()['nid'];
+             // TODO: Fix location.search()
+             var key = $location.search()['nid'];
              var node = workspace.keyToNodeMap[key];
              objName = node.objectName;
           }
@@ -381,8 +382,8 @@ var ARTEMIS = (function(ARTEMIS) {
              else {
                 onDlq(false);
              }
-             jolokia.request({ type: 'exec', mbean: objName, operation: 'countMessages()'}, onSuccess(function(response) {$scope.totalServerItems = response.value;}));
-             jolokia.request({ type: 'exec', mbean: objName, operation: 'browse(int, int)', arguments: [$scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable));
+             jolokia.request({ type: 'exec', mbean: objName, operation: 'countMessages()'}, Core.onSuccess(function(response) {$scope.totalServerItems = response.value;}));
+             jolokia.request({ type: 'exec', mbean: objName, operation: 'browse(int, int)', arguments: [$scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable));
           }
        }
 

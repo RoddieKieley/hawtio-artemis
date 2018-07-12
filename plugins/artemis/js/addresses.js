@@ -24,20 +24,44 @@ var ARTEMIS = (function(ARTEMIS) {
 
         var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
 
+        $scope.$on("$routeChangeSuccess", function (event, current, previous) {
+            // lets do this asynchronously to avoid Error: $digest already in progress
+            setTimeout(updateSelectionFromURL, 50);
+        });
+
+        function updateSelectionFromURL() {
+            //$location.path("jmx/attributes").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
+            Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#artemistree"), function (first) {
+                // use function to auto select the queue folder on the 1st broker
+                var jms = first.getChildren()[0];
+                ARTEMIS.log.info("%%%%%%" + jms);
+                var queues = jms.getChildren()[0];
+                if (queues && queues.data.title === 'Queue') {
+                    first = queues;
+                    first.expand(true);
+                    return first;
+                }
+                return null;
+            }, true);
+        }
+
         /**
          *  Required For Each Object Type
          */
 
         var objectType = "address";
         var method = 'listAddresses(java.lang.String, int, int)';
-        //var method = 'listAddresses(java.lang.String)';
+
+        // TODO: Put the manage column back
         var attributes = [
-           {
-               field: 'manage',
-               displayName: 'manage',
-               width: '*',
-               cellTemplate: '<div class="ngCellText"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
-           },
+//           {
+//               field: 'manage',
+//               displayName: 'manage',
+//               width: '*',
+//               //cellTemplate: '<div class="ngCellText"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//               //cellTemplate: '<div class="ngCellText"><a href="/jmx/attributes?main-tab=artemis&sub-tab=artemis-attributes&nid=root-org.apache.activemq.artemis-%220.0.0.0%22-addresses-%22{{row.entity.name}}%22-queues-%22anycast%22-%22{{row.entity.name}}%22" ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//               cellTemplate: '<div class="ngCellText"><a href="navigateToAddressAtts(row)"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//           },
            {
                 field: 'id',
                 displayName: 'ID',
@@ -137,6 +161,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -144,7 +169,7 @@ var ARTEMIS = (function(ARTEMIS) {
         };
 
         $scope.refresh = function () {
-            refreshed = true;
+            //refreshed = true;
             $scope.loadTable();
         };
         $scope.reset = function () {
@@ -176,7 +201,7 @@ var ARTEMIS = (function(ARTEMIS) {
         function populateTable(response) {
             console.log("populateTable with response: " + response);
             var data = JSON.parse(response.value);
-            console.log("Got data: ", data);
+            //console.log("Got data: ", data);
             $scope.objects = [];
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
@@ -185,10 +210,10 @@ var ARTEMIS = (function(ARTEMIS) {
             $scope.totalServerItems = data["count"];
             console.log("totalServerItems: ", $scope.totalServerItems);
             $scope.gridOptions.pagingOptions.currentPage = 1;
-            if (refreshed == true) {
-                $scope.gridOptions.pagingOptions.currentPage = 1;
-                refreshed = false;
-            }
+//            if (refreshed == true) {
+//                $scope.gridOptions.pagingOptions.currentPage = 1;
+//                refreshed = false;
+//            }
             Core.$apply($scope);
         }
         $scope.$watch('sortOptions', function (newVal, oldVal) {

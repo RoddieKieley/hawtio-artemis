@@ -14,110 +14,527 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var ARTEMIS;
+(function (ARTEMIS) {
+    ARTEMIS.jmsHeaderSchema = {
+        definitions: {
+            headers: {
+                properties: {
+                    JMSCorrelationID: {
+                        type: "java.lang.String"
+                    },
+                    JMSDeliveryMode: {
+                        "type": "string",
+                        "enum": [
+                            "PERSISTENT",
+                            "NON_PERSISTENT"
+                        ]
+                    },
+                    JMSDestination: {
+                        type: "javax.jms.Destination"
+                    },
+                    JMSExpiration: {
+                        type: "long"
+                    },
+                    JMSPriority: {
+                        type: "int"
+                    },
+                    JMSReplyTo: {
+                        type: "javax.jms.Destination"
+                    },
+                    JMSType: {
+                        type: "java.lang.String"
+                    },
+                    JMSXGroupId: {
+                        type: "java.lang.String"
+                    },
+                    _AMQ_SCHED_DELIVERY: {
+                        type: "java.lang.String"
+                    }
+                }
+            },
+            "javax.jms.Destination": {
+                type: "java.lang.String"
+            }
+        }
+    };
+})(ARTEMIS || (ARTEMIS = {}));
+//# sourceMappingURL=jmsHeaderSchema.js.map
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /**
  * @module ARTEMIS
+ * @main ARTEMIS
+ *
+ * The main entrypoint for the ARTEMIS module
+ *
  */
 var ARTEMIS = (function(ARTEMIS) {
 
-    /**
-     * @method AddressController
-     * @param $scope
-     * @param ARTEMISService
-     *
-     * Controller for the Create interface
-     */
-    ARTEMIS.AddressController = function ($scope, workspace, ARTEMISService, jolokia, localStorage) {
-        Core.initPreferenceScope($scope, localStorage, {
-            'routingType': {
-                'value': 0,
-                'converter': parseInt,
-                'formatter': parseInt
-            }
-        });
-        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
-        $scope.workspace = workspace;
-        $scope.message = "";
-        $scope.deleteDialog = false;
-        $scope.$watch('workspace.selection', function () {
-            workspace.moveIfViewInvalid();
-        });
-        function operationSuccess() {
-            $scope.addressName = "";
-            $scope.workspace.operationCounter += 1;
-            Core.$apply($scope);
-            Core.notification("success", $scope.message);
-            $scope.workspace.loadTree();
-        }
-        function deleteSuccess() {
-            // lets set the selection to the parent
-            workspace.removeAndSelectParentNode();
-            $scope.workspace.operationCounter += 1;
-            Core.$apply($scope);
-            Core.notification("success", $scope.message);
-            $scope.workspace.loadTree();
-        }
-        $scope.createAddress = function (name, routingType) {
-            var mbean = getBrokerMBean(jolokia);
-            if (mbean) {
-                if (routingType == 0) {
-                    $scope.message = "Created  Multicast Address " + name;
-                    ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "MULTICAST", onSuccess(operationSuccess));
-                }
-                else if (routingType == 1) {
-                    $scope.message = "Created Anycast Address " + name;
-                    ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST", onSuccess(operationSuccess));
-                }
-                else {
-                    $scope.message = "Created Anycast/Multicast Address " + name;
-                    ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST,MULTICAST", onSuccess(operationSuccess));
-                }
-            }
-        };
-        $scope.deleteAddress = function () {
-            var selection = workspace.selection;
-            var entries = selection.entries;
-            var mbean = getBrokerMBean(jolokia);
-            ARTEMIS.log.info(mbean);
-            if (mbean) {
-                if (selection && jolokia && entries) {
-                    var domain = selection.domain;
-                    var name = entries["address"];
-                    name = name.unescapeHTML();
-                    if (name.charAt(0) === '"' && name.charAt(name.length -1) === '"')
-                    {
-                        name = name.substr(1,name.length -2);
-                    }
-                    name = ARTEMISService.artemisConsole.ownUnescape(name);
-                    ARTEMIS.log.info(name);
-                    var operation;
-                    $scope.message = "Deleted address " + name;
-                    ARTEMISService.artemisConsole.deleteAddress(mbean, jolokia, name, onSuccess(deleteSuccess));
-                }
-            }
-        };
-        $scope.name = function () {
-            var selection = workspace.selection;
-            if (selection) {
-                return ARTEMISService.artemisConsole.ownUnescape(selection.title);
-            }
-            return null;
-        };
+   /**
+    * @property pluginName
+    * @type {string}
+    *
+    * The name of this plugin
+    */
+   ARTEMIS.pluginName = "ARTEMIS";
 
-        function getBrokerMBean(jolokia) {
-            var mbean = null;
-            var selection = workspace.selection;
-            var folderNames = selection.folderNames;
-            mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
-            ARTEMIS.log.info("broker=" + mbean);
-            return mbean;
-        }
-    };
+   /**
+    * @property log
+    * @type {Logging.Logger}
+    *
+    * This plugin's logger instance
+    */
+   ARTEMIS.log = Logger.get(ARTEMIS.pluginName);
 
-    return ARTEMIS;
-} (ARTEMIS || {}));
+   /**
+    * @property templatePath
+    * @type {string}
+    *
+    * The top level path to this plugin's partials
+    */
+   ARTEMIS.templatePath = "plugins/artemis/html/";
+
+   /**
+    * @property jmxDomain
+    * @type {string}
+    *
+    * The JMX domain this plugin mostly works with
+    */
+   ARTEMIS.jmxDomain = "hawtio"
+
+   /**
+    * @property mbeanType
+    * @type {string}
+    *
+    * The mbean type this plugin will work with
+    */
+   ARTEMIS.mbeanType = "ARTEMISHandler";
+
+   /**
+    * @property mbean
+    * @type {string}
+    *
+    * The mbean's full object name
+    */
+   ARTEMIS.mbean = ARTEMIS.jmxDomain + ":type=" + ARTEMIS.mbeanType;
+
+   /**
+    * @property SETTINGS_KEY
+    * @type {string}
+    *
+    * The key used to fetch our settings from local storage
+    */
+   ARTEMIS.SETTINGS_KEY = 'ARTEMISSettings';
+
+   /**
+    * @property module
+    * @type {object}
+    *
+    * This plugin's angularjs module instance
+    */
+   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngResource', 'hawtio-compat.dialog', 'hawtio-compat.transition', 'hawtio-core', 'camel', 'hawtio-ui']);
+
+   //https://code.angularjs.org/1.5.11/docs/guide/migration#migrating-from-1-2-to-1-3
+    angular.module(ARTEMIS.pluginName).config(['$controllerProvider', function($controllerProvider) {
+      // this option might be handy for migrating old apps, but please don't use it
+      // in new ones!
+      $controllerProvider.allowGlobals();
+    }]);
+
+
+
+   // set up the routing for this plugin, these are referenced by the subleveltabs added below
+   ARTEMIS.module.config(function($routeProvider) {
+      $routeProvider
+         .when('/artemis/createAddress', {
+            templateUrl: ARTEMIS.templatePath + 'createAddress.html'
+         })
+         .when('/artemis/deleteAddress', {
+           templateUrl: ARTEMIS.templatePath + 'deleteAddress.html'
+         })
+         .when('/artemis/deleteQueue', {
+            templateUrl: ARTEMIS.templatePath + 'deleteQueue.html'
+         })
+         .when('/artemis/createQueue', {
+            templateUrl: ARTEMIS.templatePath + 'createQueue.html'
+         })
+         .when('/artemis/browseQueue', {
+            templateUrl: ARTEMIS.templatePath + 'browseQueue.html'
+         })
+         .when('/jmx/browseQueue', {
+            templateUrl: ARTEMIS.templatePath + 'browseQueue.html'
+         })
+         .when('/artemis/diagram', {
+            templateUrl: ARTEMIS.templatePath + 'brokerDiagram.html'
+         })
+         .when('/jmx/diagram', {
+            templateUrl: ARTEMIS.templatePath + 'brokerDiagram.html'
+         })
+         .when('/artemis/sendMessage', {
+            templateUrl: ARTEMIS.templatePath + 'sendMessage.html'
+         })
+         .when('/jmx/sendMessage', {
+            templateUrl: ARTEMIS.templatePath + 'sendMessage.html'
+         })
+         .when('/artemis/connections', {
+            templateUrl: ARTEMIS.templatePath + 'connections.html'
+         })
+         .when('/jmx/connections', {
+            templateUrl: ARTEMIS.templatePath + 'connections.html'
+         })
+         .when('/artemis/sessions', {
+            templateUrl: ARTEMIS.templatePath + 'sessions.html'
+         })
+         .when('/jmx/sessions', {
+            templateUrl: ARTEMIS.templatePath + 'sessions.html'
+         })
+         .when('/artemis/consumers', {
+            templateUrl: ARTEMIS.templatePath + 'consumers.html'
+         })
+         .when('/jmx/consumers', {
+            templateUrl: ARTEMIS.templatePath + 'consumers.html'
+         })
+         .when('/artemis/producers', {
+            templateUrl: ARTEMIS.templatePath + 'producers.html'
+         })
+         .when('/jmx/producers', {
+            templateUrl: ARTEMIS.templatePath + 'producers.html'
+         })
+         .when('/artemis/addresses', {
+            templateUrl: ARTEMIS.templatePath + 'addresses.html'
+         })
+         .when('/jmx/addresses', {
+            templateUrl: ARTEMIS.templatePath + 'addresses.html'
+         })
+         .when('/artemis/queues', {
+            templateUrl: ARTEMIS.templatePath + 'queues.html'
+         })
+         .when('/jmx/queues', {
+            templateUrl: ARTEMIS.templatePath + 'queues.html'
+      });
+   });
+
+   ARTEMIS.module.factory('artemisMessage', function () {
+        return { 'message': null };
+   });
+   ARTEMIS.module.factory('artemisConnection', function () {
+        return { 'connection': null };
+   });
+   ARTEMIS.module.factory('artemisSession', function () {
+        return { 'session': null };
+   });
+   ARTEMIS.module.factory('artemisConsumer', function () {
+        return { 'consumer': null };
+   });
+   ARTEMIS.module.factory('artemisProducer', function () {
+        return { 'producer': null };
+   });
+   ARTEMIS.module.factory('artemisQueue', function () {
+        return { 'queue': null };
+   });
+   ARTEMIS.module.factory('artemisAddress', function () {
+        return { 'address': null };
+   });
+
+   // one-time initialization happens in the run function
+   // of our module
+   ARTEMIS.module.run(function(HawtioNav, workspace, viewRegistry, helpRegistry, preferencesRegistry, localStorage, jolokia, ARTEMISService, $rootScope, preLogoutTasks, $templateCache) {
+      // let folks know we're actually running
+      ARTEMIS.log.info("plugin running " + jolokia);
+
+      var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
+
+      ARTEMISService.initArtemis();
+
+      // tell hawtio that we have our own custom layout for our view
+      viewRegistry['{ "main-tab": "artemis" }'] = ARTEMIS.templatePath + "artemisLayout.html";
+
+      helpRegistry.addUserDoc("artemis", ARTEMIS.templatePath + "../doc/" + "help.md", function () {
+         return workspace.treeContainsDomainAndProperties(artemisJmxDomain);
+      });
+
+      preferencesRegistry.addTab("Artemis", ARTEMIS.templatePath + "preferences.html", function () {
+         return workspace.treeContainsDomainAndProperties(artemisJmxDomain);
+      });
+
+      // Add a top level tab to hawtio's navigation bar
+      var builder = HawtioNav.builder();
+      var tab = builder.id('artemis')
+	                   .title(function() { return 'Artemis' })
+	                   .defaultPage(
+	                   {rank: 15,
+			            isValid: function(yes, no)
+			            {var name = 'ArtemisDefaultPage';
+			             workspace.addNamedTreePostProcessor(name, function (tree)
+			             {workspace.removeNamedTreePostProcessor(name);
+				          if (workspace.treeContainsDomainAndProperties(artemisJmxDomain))
+				          {
+				              yes();
+				          }
+				          else
+				          {
+				              no();
+				          }
+			             });
+			            },
+		               })
+	                   .href(function () { return '/jmx/attributes' })
+		               .isValid(function () { return workspace.treeContainsDomainAndProperties(artemisJmxDomain); })
+		               .build();
+
+      tab.tabs = Jmx.getNavItems(builder, workspace, $templateCache, 'artemis');
+      subLevelTabs = tab.tabs;
+
+      subLevelTabs.push({
+            id: 'artemis-create-address',
+            title: function() { return '<i class="icon-plus"></i> Create' },
+            tooltip: function() { return "Create a new address" },
+            show: function() { return isBroker(workspace, artemisJmxDomain) || isAddressFolder(workspace, artemisJmxDomain); },
+            href: function() { return "/artemis/createAddress" }
+        });
+
+      subLevelTabs.push({
+         id: 'artemis-delete-address',
+         title: function() { return '<i class="icon-remove"></i> Delete' },
+         tooltip: function() { return "Delete an address" },
+         index: 4,
+         show: function () { return isAddress(workspace, artemisJmxDomain); },
+         href: function () { return "/artemis/deleteAddress"; }
+      });
+
+      subLevelTabs.push({
+         id: 'artemis-create-queue',
+         title: function() { return '<i class="icon-plus"></i> Create' },
+         tooltip: function() { return "Create a new queue" },
+         show: function () { return isAddress(workspace, artemisJmxDomain) },
+         href: function () { return "/artemis/createQueue" }
+      });
+
+        subLevelTabs.push({
+           id: 'artemis-delete-queue',
+           title: function() { return '<i class="icon-remove"></i> Delete' },
+           tooltip: function() { return "Delete or purge this queue" },
+           show: function () { return isQueue(workspace, artemisJmxDomain); },
+           href: function () { return "/artemis/deleteQueue" }
+        });
+
+        subLevelTabs.push({
+         id: 'artemis-browse-queue',
+           title: function() { return '<i class="icon-envelope"></i> Browse' },
+           tooltip: function() { return "Browse the messages on the queue" },
+           show: function () { return isQueue(workspace, artemisJmxDomain); },
+           href: function () { return "/artemis/browseQueue" + workspace.hash(); }
+        });
+
+      subLevelTabs.push({
+         id: 'artemis-send-message',
+         title: function() { return '<i class="icon-pencil"></i> Send' },
+         tooltip: function() { return "Send a message to this address" },
+         show: function () { return isAddress(workspace, artemisJmxDomain) || isQueue(workspace, artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sendMessage"; else return  "/jmx/sendMessage";}
+         //href: function () { return "/artemis/sendMessage";}
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-view-diagram',
+         title: function() { return '<i class="icon-picture"></i> Diagram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|' },
+         tooltip: function() { return "View a diagram of the producers, destinations and consumers" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/diagram"; else return  "/jmx/diagram";}
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-queues',
+         title: function() { return '<i class="icon-th-list"></i> Queues' },
+         tooltip: function() { return "Manage Queues" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/queues"; else return  "/jmx/queues"; }
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-addresses',
+         title: function() { return '<i class="icon-book"></i> Addresses' },
+         tooltip: function() { return "Manage Addresses" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/addresses"; else return  "/artemis/addresses"; }
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-producers',
+         title: function() { return '<i class="icon-upload-alt"></i> Producers' },
+         tooltip: function() { return "Manage Producers" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/producers"; else return  "/jmx/producers"; }
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-consumers',
+         title: function() { return '<i class="icon-download-alt"></i> Consumers' },
+         tooltip: function() { return "Manage Consumers" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/consumers"; else return  "/jmx/consumers"; }
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-sessions',
+         title: function() { return '<i class="icon-tasks"></i> Sessions' },
+         tooltip: function() { return "Manage Sessions" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sessions"; else return  "/jmx/sessions"; }
+      });
+
+      subLevelTabs.unshift({
+         id: 'artemis-manage-connections',
+         title: function() { return '<i class="icon-signal"></i> Connections' },
+         tooltip: function() { return "Manage Connections" },
+         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
+         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/connections"; else return  "/jmx/connections"; }
+      });
+      HawtioNav.add(tab);
+
+      preLogoutTasks.addTask("clearArtemisCredentials", () => {
+          localStorage.removeItem('artemisUserName');
+          localStorage.removeItem('artemisPassword');
+      });
+});
+
+   function isBroker(workspace, domain) {
+      return workspace.hasDomainAndProperties(domain, {'broker': 'Broker'}, 3);
+   }
+
+   function isAddressFolder(workspace, domain) {
+      return workspace.selectionHasDomainAndLastFolderName(domain, 'addresses');
+   }
+
+   function isAddress(workspace, domain) {
+      return workspace.hasDomainAndProperties(domain, {'component': 'addresses'}) && !workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'}) && !workspace.hasDomainAndProperties(domain, {'subcomponent': 'diverts'});
+   }
+
+   function isDivert(workspace, domain) {
+      return workspace.hasDomainAndProperties(domain, {'subcomponent': 'diverts'});
+   }
+
+   function isQueue(workspace, domain) {
+      return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
+   }
+
+   // TODO: Review if it is better to do this here or use the angular allowGlobals which is not recommended
+   //ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
+   //ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
+   //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
+   //ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
+   //ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
+   //ARTEMIS.module.controller("ARTEMIS.ProducersController", ARTEMIS.ProducersController);
+   //ARTEMIS.module.controller("ARTEMIS.QueuesController", ARTEMIS.QueuesController);
+   //ARTEMIS.module.controller("ARTEMIS.DiagramController", ARTEMIS.DiagramController);
+
+   return ARTEMIS;
+}(ARTEMIS || {}));
+
+// Very important!  Add our module to hawtioPluginLoader so it
+// bootstraps our module
+hawtioPluginLoader.addModule(ARTEMIS.pluginName);
+
+/*
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ Architecture
+ */
+function ArtemisConsole() {
+
+   this.getServerAttributes = function (jolokia, mBean) {
+      var req1 = { type: "read", mbean: mBean};
+      return jolokia.request(req1, {method: "post"});
+   };
+
+   this.createAddress = function (mbean, jolokia, name, routingType,  method) {
+      jolokia.execute(mbean, "createAddress(java.lang.String,java.lang.String)", name, routingType,  method);
+   };
+
+   this.deleteAddress = function (mbean, jolokia, name, method) {
+      jolokia.execute(mbean, "deleteAddress(java.lang.String)", name,  method);
+   };
+
+   this.createQueue = function (mbean, jolokia, address, routingType, name, durable, filter, maxConsumers, purgeWhenNoConsumers, method) {
+      jolokia.execute(mbean, "createQueue(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean,int,boolean,boolean)", address, routingType, name, filter, durable, maxConsumers, purgeWhenNoConsumers, true, method);
+   };
+
+   this.deleteQueue = function (mbean, jolokia, name, method) {
+      jolokia.execute(mbean, "destroyQueue(java.lang.String)", name,  method);
+   };
+
+   this.purgeQueue = function (mbean, jolokia, method) {
+	  jolokia.execute(mbean, "removeAllMessages()", method);
+   };
+
+   this.browse = function (mbean, jolokia, method) {
+      jolokia.request({ type: 'exec', mbean: mbean, operation: 'browse()' }, method);
+   };
+
+   this.deleteMessage = function (mbean, jolokia, id,  method) {
+      ARTEMIS.log.info("executing on " + mbean);
+      jolokia.execute(mbean, "removeMessage(long)", id, method);
+   };
+
+   this.moveMessage = function (mbean, jolokia, id, queueName,  method) {
+      jolokia.execute(mbean, "moveMessage(long,java.lang.String)", id, queueName, method);
+   };
+
+   this.retryMessage = function (mbean, jolokia, id, method) {
+      jolokia.execute(mbean, "retryMessage(java.lang.String)", id,  method);
+   };
+
+   this.sendMessage = function (mbean, jolokia, headers, type, body, durable, user, pwd, method) {
+      jolokia.execute(mbean, "sendMessage(java.util.Map, int, java.lang.String, boolean, java.lang.String, java.lang.String)", headers, type, body, durable, user, pwd,  method);
+   };
+
+   this.getConsumers = function (mbean, jolokia, method) {
+      jolokia.request({ type: 'exec', mbean: mbean, operation: 'listAllConsumersAsJSON()' }, method);
+   };
+
+   this.getRemoteBrokers = function (mbean, jolokia, method) {
+      jolokia.request({ type: 'exec', mbean: mbean, operation: 'listNetworkTopology()' }, method);
+   };
+
+   this.ownUnescape = function (name) {
+      //simple return unescape(name); does not work for this :(
+      return name.replace(/\\\\/g, "\\").replace(/\\\*/g, "*").replace(/\\\?/g, "?");
+   };
+}
+
+function getServerAttributes() {
+   var console = new ArtemisConsole();
+   //return console.getVersion(new Jolokia("http://localhost:8161/jolokia/"));
+   return console.getVersion(new Jolokia("http://localhost:8778/jolokia/"));
+}
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -137,210 +554,32 @@ var ARTEMIS = (function(ARTEMIS) {
 /**
  * @module ARTEMIS
  */
+
 var ARTEMIS = (function(ARTEMIS) {
 
-    ARTEMIS.AddressesController = function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
-    //ARTEMIS.module.controller("ARTEMIS.AddressesController", ["$scope", "$location", "workspace", "ARTEMISService", "jolokia", "localStorage", "artemisAddress", function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
-
-        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
-
-        /**
-         *  Required For Each Object Type
-         */
-
-        var objectType = "address";
-        var method = 'listAddresses(java.lang.String, int, int)';
-        //var method = 'listAddresses(java.lang.String)';
-        var attributes = [
-           {
-               field: 'manage',
-               displayName: 'manage',
-               width: '*',
-               cellTemplate: '<div class="ngCellText"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
-           },
-           {
-                field: 'id',
-                displayName: 'ID',
-                width: '*'
-            },
-            {
-                field: 'name',
-                displayName: 'Name',
-                width: '*'
-            },
-            {
-                field: 'routingTypes',
-                displayName: 'Routing Types',
-                width: '*',
-                sortable: false
-            },
-            {
-                field: 'queueCount',
-                displayName: 'Queue Count',
-                width: '*',
-                sortable: false
-            }
-        ];
-        $scope.filter = {
-            fieldOptions: [
-                {id: 'ID', name: 'ID'},
-                {id: 'NAME', name: 'Name'},
-                {id: 'ROUTING_TYPES', name: 'Routing Types'},
-                {id: 'QUEUE_COUNT', name: 'Queue Count'},
-            ],
-            operationOptions: [
-                {id: 'EQUALS', name: 'Equals'},
-                {id: 'CONTAINS', name: 'Contains'},
-                {id: 'GREATER_THAN', name: 'Greater Than'},
-                {id: 'LESS_THAN', name: 'Less Than'}
-            ],
-            values: {
-                field: "",
-                operation: "",
-                value: "",
-                sortOrder: "asc",
-                sortBy: "ID"
-            }
-        };
-
-        /**
-         *  Below here is utility.
-         *
-         *  TODO Refactor into new separate files
-         */
+  ARTEMIS.SERVER = 'Server Messages';
 
 
-        if (artemisAddress.address) {
-            $scope.filter.values.field = $scope.filter.fieldOptions[1].id;
-            $scope.filter.values.operation = $scope.filter.operationOptions[0].id;
-            $scope.filter.values.value = artemisAddress.address.address;
-            artemisAddress.address = null;
-        }
+  // The ARTEMIS service handles the connection to
+  // the Artemis Jolokia server in the background
+  ARTEMIS.module.factory("ARTEMISService", function(jolokia, $rootScope) {
+    var self = {
+      artemisConsole: undefined,
 
-        $scope.navigateToAddressAtts = function (row) {
-            $location.path("jmx/attributes").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
-        };
-        $scope.navigateToAddressOps = function (row) {
-            $location.path("jmx/operations").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
-        };
-        $scope.workspace = workspace;
-        $scope.objects = [];
-        $scope.totalServerItems = 0;
-        $scope.pagingOptions = {
-            pageSizes: [50, 100, 200],
-            pageSize: 100,
-            currentPage: 1
-        };
-        $scope.sortOptions = {
-            fields: ["id"],
-            columns: ["id"],
-            directions: ["asc"]
-        };
-        var refreshed = false;
-
-        $scope.gridOptions = {
-            selectedItems: [],
-            data: 'objects',
-            showFooter: true,
-            showFilter: true,
-            showColumnMenu: true,
-            enableCellSelection: false,
-            enableHighlighting: true,
-            enableColumnResize: true,
-            enableColumnReordering: true,
-            selectWithCheckboxOnly: false,
-            showSelectionCheckbox: false,
-            multiSelect: false,
-            displaySelectionCheckbox: false,
-            pagingOptions: $scope.pagingOptions,
-            enablePaging: true,
-            totalServerItems: 'totalServerItems',
-            maintainColumnRatios: false,
-            columnDefs: attributes,
-            enableFiltering: true,
-            useExternalFiltering: true,
-            sortInfo: $scope.sortOptions,
-            useExternalSorting: true,
-        };
-
-        $scope.refresh = function () {
-            refreshed = true;
-            $scope.loadTable();
-        };
-        $scope.reset = function () {
-            $scope.filter.values.field = "";
-            $scope.filter.values.operation = "";
-            $scope.filter.values.value = "";
-            $scope.loadTable();
-        };
-        $scope.loadTable = function () {
-        	$scope.filter.values.sortColumn = $scope.sortOptions.fields[0];
-            $scope.filter.values.sortBy = $scope.sortOptions.directions[0];
-	        $scope.filter.values.sortOrder = $scope.sortOptions.directions[0];
-            var mbean = getBrokerMBean(jolokia);
-            if (mbean.includes("undefined")) {
-                onBadMBean();
-            } else if (mbean) {
-                var filter = JSON.stringify($scope.filter.values);
-                console.log("Filter string: " + filter);
-                //jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
-                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
-            }
-        };
-        function onError() {
-            Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
-        }
-        function onBadMBean() {
-            Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
-        }
-        function populateTable(response) {
-            console.log("populateTable with response: " + response);
-            var data = JSON.parse(response.value);
-            console.log("Got data: ", data);
-            $scope.objects = [];
-            angular.forEach(data["data"], function (value, idx) {
-                $scope.objects.push(value);
-            });
-
-            $scope.totalServerItems = data["count"];
-            console.log("totalServerItems: ", $scope.totalServerItems);
-            $scope.gridOptions.pagingOptions.currentPage = 1;
-            if (refreshed == true) {
-                $scope.gridOptions.pagingOptions.currentPage = 1;
-                refreshed = false;
-            }
-            Core.$apply($scope);
-        }
-        $scope.$watch('sortOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal) {
-                $scope.loadTable();
-            }
-        }, true);
-        $scope.$watch('pagingOptions', function (newVal, oldVal) {
-            if (parseInt(newVal.currentPage) && newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
-                $scope.loadTable();
-            }
-            if (parseInt(newVal.pageSize) && newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                $scope.pagingOptions.currentPage = 1;
-                $scope.loadTable();
-            }
-        }, true);
-
-        function getBrokerMBean(jolokia) {
-            var mbean = null;
-            var selection = workspace.selection;
-            var folderNames = selection.folderNames;
-            mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
-            ARTEMIS.log.info("broker=" + mbean);
-            return mbean;
-        };
-        $scope.refresh();
+      getVersion: function(jolokia) {
+        ARTEMIS.log.info("Connecting to ARTEMIS service: " + self.artemisConsole.getServerAttributes(jolokia));
+      } ,
+      initArtemis: function(broker) {
+        ARTEMIS.log.info("*************creating Artemis Console************");
+        self.artemisConsole = new ArtemisConsole();
+      }
     };
-    //}]);
 
-    return ARTEMIS;
+    return self;
+  });
 
-} (ARTEMIS || {}));
+  return ARTEMIS;
+}(ARTEMIS || {}));
 
 
 /*
@@ -508,369 +747,128 @@ var ARTEMIS;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="artemisPlugin.ts"/>
+var ARTEMIS;
+(function (ARTEMIS) {
+    ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ["$scope", function ($scope) {
+    //ARTEMIS.TreeHeaderController = function ($scope) {
+        $scope.expandAll = function () {
+            Tree.expandAll("#artemistree");
+        };
+        $scope.contractAll = function () {
+            Tree.contractAll("#artemistree");
+        };
+    //};
+    }]);
+    ARTEMIS.module.controller("ARTEMIS.TreeController", ["$scope", "$location", "workspace", "localStorage", function ($scope, $location, workspace, localStorage) {
+        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
+        ARTEMIS.log.info("init tree " + artemisJmxDomain);
+        $scope.$on("$routeChangeSuccess", function (event, current, previous) {
+            // lets do this asynchronously to avoid Error: $digest already in progress
+            setTimeout(updateSelectionFromURL, 50);
+        });
+        $scope.$watch('workspace.tree', function () {
+            reloadTree();
+        });
+        $scope.$on('jmxTreeUpdated', function () {
+            reloadTree();
+        });
+        function reloadTree() {
+            ARTEMIS.log.info("workspace tree has changed, lets reload the artemis tree");
+            var children = [];
+            var tree = workspace.tree;
+
+            ARTEMIS.log.info("tree="+tree);
+            if (tree) {
+                var domainName = artemisJmxDomain;
+                var folder = tree.get(domainName);
+
+                ARTEMIS.log.info("folder="+folder);
+                if (folder) {
+                    children = folder.children;
+                }
+                var treeElement = $("#artemistree");
+                Jmx.enableTree($scope, $location, workspace, treeElement, children, true);
+                // lets do this asynchronously to avoid Error: $digest already in progress
+                setTimeout(updateSelectionFromURL, 50);
+            }
+        }
+        function updateSelectionFromURL() {
+            Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#artemistree"), function (first) {
+                // use function to auto select the queue folder on the 1st broker
+                var jms = first.getChildren()[0];
+                ARTEMIS.log.info("%%%%%%" + jms);
+                var queues = jms.getChildren()[0];
+                if (queues && queues.data.title === 'Queue') {
+                    first = queues;
+                    first.expand(true);
+                    return first;
+                }
+                return null;
+            }, true);
+        }
+    }]);
+
+    //ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ARTEMIS.TreeHeaderController);
+
+})(ARTEMIS || (ARTEMIS = {}));
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /**
  * @module ARTEMIS
- * @main ARTEMIS
- *
- * The main entrypoint for the ARTEMIS module
- *
  */
 var ARTEMIS = (function(ARTEMIS) {
 
    /**
-    * @property pluginName
-    * @type {string}
+    * @method PreferencesController
+    * @param $scope
     *
-    * The name of this plugin
+    * Controller for the Preferences interface
     */
-   ARTEMIS.pluginName = "ARTEMIS";
-
-   /**
-    * @property log
-    * @type {Logging.Logger}
-    *
-    * This plugin's logger instance
-    */
-   ARTEMIS.log = Logger.get(ARTEMIS.pluginName);
-
-   /**
-    * @property templatePath
-    * @type {string}
-    *
-    * The top level path to this plugin's partials
-    */
-   ARTEMIS.templatePath = "plugins/artemis/html/";
-
-   /**
-    * @property jmxDomain
-    * @type {string}
-    *
-    * The JMX domain this plugin mostly works with
-    */
-   ARTEMIS.jmxDomain = "hawtio"
-
-   /**
-    * @property mbeanType
-    * @type {string}
-    *
-    * The mbean type this plugin will work with
-    */
-   ARTEMIS.mbeanType = "ARTEMISHandler";
-
-   /**
-    * @property mbean
-    * @type {string}
-    *
-    * The mbean's full object name
-    */
-   ARTEMIS.mbean = ARTEMIS.jmxDomain + ":type=" + ARTEMIS.mbeanType;
-
-   /**
-    * @property SETTINGS_KEY
-    * @type {string}
-    *
-    * The key used to fetch our settings from local storage
-    */
-   ARTEMIS.SETTINGS_KEY = 'ARTEMISSettings';
-
-   /**
-    * @property module
-    * @type {object}
-    *
-    * This plugin's angularjs module instance
-    */
-   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngResource', 'hawtio-compat.dialog', 'hawtio-compat.transition', 'hawtio-core', 'camel', 'hawtio-ui']);
-
-   // set up the routing for this plugin, these are referenced by the subleveltabs added below
-   ARTEMIS.module.config(function($routeProvider) {
-      $routeProvider
-         .when('/artemis/createAddress', {
-            templateUrl: ARTEMIS.templatePath + 'createAddress.html'
-         })
-         .when('/artemis/deleteAddress', {
-           templateUrl: ARTEMIS.templatePath + 'deleteAddress.html'
-         })
-         .when('/artemis/deleteQueue', {
-            templateUrl: ARTEMIS.templatePath + 'deleteQueue.html'
-         })
-         .when('/artemis/createQueue', {
-            templateUrl: ARTEMIS.templatePath + 'createQueue.html'
-         })
-         .when('/artemis/browseQueue', {
-            templateUrl: ARTEMIS.templatePath + 'browseQueue.html'
-         })
-         .when('/jmx/browseQueue', {
-            templateUrl: ARTEMIS.templatePath + 'browseQueue.html'
-         })
-         .when('/artemis/diagram', {
-            templateUrl: ARTEMIS.templatePath + 'brokerDiagram.html'
-         })
-         .when('/jmx/diagram', {
-            templateUrl: ARTEMIS.templatePath + 'brokerDiagram.html'
-         })
-         .when('/artemis/sendMessage', {
-            templateUrl: ARTEMIS.templatePath + 'sendMessage.html'
-         })
-         .when('/jmx/sendMessage', {
-            templateUrl: ARTEMIS.templatePath + 'sendMessage.html'
-         })
-         .when('/artemis/connections', {
-            templateUrl: ARTEMIS.templatePath + 'connections.html'
-         })
-         .when('/jmx/connections', {
-            templateUrl: ARTEMIS.templatePath + 'connections.html'
-         })
-         .when('/artemis/sessions', {
-            templateUrl: ARTEMIS.templatePath + 'sessions.html'
-         })
-         .when('/jmx/sessions', {
-            templateUrl: ARTEMIS.templatePath + 'sessions.html'
-         })
-         .when('/artemis/consumers', {
-            templateUrl: ARTEMIS.templatePath + 'consumers.html'
-         })
-         .when('/jmx/consumers', {
-            templateUrl: ARTEMIS.templatePath + 'consumers.html'
-         })
-         .when('/artemis/producers', {
-            templateUrl: ARTEMIS.templatePath + 'producers.html'
-         })
-         .when('/jmx/producers', {
-            templateUrl: ARTEMIS.templatePath + 'producers.html'
-         })
-         .when('/artemis/addresses', {
-            templateUrl: ARTEMIS.templatePath + 'addresses.html'
-         })
-         .when('/jmx/addresses', {
-            templateUrl: ARTEMIS.templatePath + 'addresses.html'
-         })
-         .when('/artemis/queues', {
-            templateUrl: ARTEMIS.templatePath + 'queues.html'
-         })
-         .when('/jmx/queues', {
-            templateUrl: ARTEMIS.templatePath + 'queues.html'
+   ARTEMIS.PreferencesController = function ($scope, localStorage, userDetails, $rootScope) {
+      Core.initPreferenceScope($scope, localStorage, {
+         'artemisUserName': {
+            'value': userDetails.username
+         },
+         'artemisPassword': {
+            'value': userDetails.password
+         },
+         'artemisDLQ': {
+            'value': "DLQ"
+         },
+         'artemisExpiryQueue': {
+            'value': "ExpiryQueue"
+         },
+         'artemisBrowseBytesMessages': {
+            'value': 1,
+            'converter': parseInt,
+            'formatter': function (value) {
+               return "" + value;
+            }
+         }
       });
-   });
+   };
 
-   ARTEMIS.module.factory('artemisMessage', function () {
-        return { 'message': null };
-   });
-   ARTEMIS.module.factory('artemisConnection', function () {
-        return { 'connection': null };
-   });
-   ARTEMIS.module.factory('artemisSession', function () {
-        return { 'session': null };
-   });
-   ARTEMIS.module.factory('artemisConsumer', function () {
-        return { 'consumer': null };
-   });
-   ARTEMIS.module.factory('artemisProducer', function () {
-        return { 'producer': null };
-   });
-   ARTEMIS.module.factory('artemisQueue', function () {
-        return { 'queue': null };
-   });
-   ARTEMIS.module.factory('artemisAddress', function () {
-        return { 'address': null };
-   });
-
-   // one-time initialization happens in the run function
-   // of our module
-   ARTEMIS.module.run(function(HawtioNav, workspace, viewRegistry, helpRegistry, preferencesRegistry, localStorage, jolokia, ARTEMISService, $rootScope, preLogoutTasks, $templateCache) {
-      // let folks know we're actually running
-      ARTEMIS.log.info("plugin running " + jolokia);
-
-      var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
-
-      ARTEMISService.initArtemis();
-
-      // tell hawtio that we have our own custom layout for our view
-      viewRegistry['{ "main-tab": "artemis" }'] = ARTEMIS.templatePath + "artemisLayout.html";
-
-      helpRegistry.addUserDoc("artemis", ARTEMIS.templatePath + "../doc/" + "help.md", function () {
-         return workspace.treeContainsDomainAndProperties(artemisJmxDomain);
-      });
-
-      preferencesRegistry.addTab("Artemis", ARTEMIS.templatePath + "preferences.html", function () {
-         return workspace.treeContainsDomainAndProperties(artemisJmxDomain);
-      });
-
-      // Add a top level tab to hawtio's navigation bar
-      var builder = HawtioNav.builder();
-      var tab = builder.id('artemis')
-	                   .title(function() { return 'Artemis' })
-	                   .defaultPage(
-	                   {rank: 15,
-			            isValid: function(yes, no)
-			            {var name = 'ArtemisDefaultPage';
-			             workspace.addNamedTreePostProcessor(name, function (tree)
-			             {workspace.removeNamedTreePostProcessor(name);
-				          if (workspace.treeContainsDomainAndProperties(artemisJmxDomain))
-				          {
-				              yes();
-				          }
-				          else
-				          {
-				              no();
-				          }
-			             });
-			            },
-		               })
-	                   .href(function () { return '/jmx/attributes' })
-		               .isValid(function () { return workspace.treeContainsDomainAndProperties(artemisJmxDomain); })
-		               .build();
-
-      tab.tabs = Jmx.getNavItems(builder, workspace, $templateCache, 'artemis');
-      subLevelTabs = tab.tabs;
-
-      subLevelTabs.push({
-            id: 'artemis-create-address',
-            title: function() { return '<i class="icon-plus"></i> Create' },
-            tooltip: function() { return "Create a new address" },
-            show: function() { return isBroker(workspace, artemisJmxDomain) || isAddressFolder(workspace, artemisJmxDomain); },
-            href: function() { return "/artemis/createAddress" }
-        });
-
-      subLevelTabs.push({
-         id: 'artemis-delete-address',
-         title: function() { return '<i class="icon-remove"></i> Delete' },
-         tooltip: function() { return "Delete an address" },
-         index: 4,
-         show: function () { return isAddress(workspace, artemisJmxDomain); },
-         href: function () { return "#/artemis/deleteAddress"; }
-      });
-
-      subLevelTabs.push({
-         id: 'artemis-create-queue',
-         title: function() { return '<i class="icon-plus"></i> Create' },
-         tooltip: function() { return "Create a new queue" },
-         show: function () { return isAddress(workspace, artemisJmxDomain) },
-         href: function () { return "#/artemis/createQueue" }
-      });
-
-        subLevelTabs.push({
-           id: 'artemis-delete-queue',
-           title: function() { return '<i class="icon-remove"></i> Delete' },
-           tooltip: function() { return "Delete or purge this queue" },
-           show: function () { return isQueue(workspace, artemisJmxDomain); },
-           href: function () { return "#/artemis/deleteQueue" }
-        });
-
-        subLevelTabs.push({
-         id: 'artemis-browse-queue',
-           title: function() { return '<i class="icon-envelope"></i> Browse' },
-           tooltip: function() { return "Browse the messages on the queue" },
-           show: function () { return isQueue(workspace, artemisJmxDomain); },
-           href: function () { return "/artemis/browseQueue" + workspace.hash(); }
-        });
-
-      subLevelTabs.push({
-         id: 'artemis-send-message',
-         title: function() { return '<i class="icon-pencil"></i> Send' },
-         tooltip: function() { return "Send a message to this address" },
-         show: function () { return isAddress(workspace, artemisJmxDomain) || isQueue(workspace, artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sendMessage"; else return  "/jmx/sendMessage";}
-         //href: function () { return "/artemis/sendMessage";}
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-view-diagram',
-         title: function() { return '<i class="icon-picture"></i> Diagram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|' },
-         tooltip: function() { return "View a diagram of the producers, destinations and consumers" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/diagram"; else return  "/jmx/diagram";}
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-queues',
-         title: function() { return '<i class="icon-th-list"></i> Queues' },
-         tooltip: function() { return "Manage Queues" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/queues"; else return  "/jmx/queues"; }
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-addresses',
-         title: function() { return '<i class="icon-book"></i> Addresses' },
-         tooltip: function() { return "Manage Addresses" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/addresses"; else return  "/artemis/addresses"; }
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-producers',
-         title: function() { return '<i class="icon-upload-alt"></i> Producers' },
-         tooltip: function() { return "Manage Producers" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/producers"; else return  "/jmx/producers"; }
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-consumers',
-         title: function() { return '<i class="icon-download-alt"></i> Consumers' },
-         tooltip: function() { return "Manage Consumers" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/consumers"; else return  "/jmx/consumers"; }
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-sessions',
-         title: function() { return '<i class="icon-tasks"></i> Sessions' },
-         tooltip: function() { return "Manage Sessions" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sessions"; else return  "/jmx/sessions"; }
-      });
-
-      subLevelTabs.unshift({
-         id: 'artemis-manage-connections',
-         title: function() { return '<i class="icon-signal"></i> Connections' },
-         tooltip: function() { return "Manage Connections" },
-         show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
-         href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/connections"; else return  "/jmx/connections"; }
-      });
-      HawtioNav.add(tab);
-
-      preLogoutTasks.addTask("clearArtemisCredentials", () => {
-          localStorage.removeItem('artemisUserName');
-          localStorage.removeItem('artemisPassword');
-      });
-});
-
-   function isBroker(workspace, domain) {
-      return workspace.hasDomainAndProperties(domain, {'broker': 'Broker'}, 3);
-   }
-
-   function isAddressFolder(workspace, domain) {
-      return workspace.selectionHasDomainAndLastFolderName(domain, 'addresses');
-   }
-
-   function isAddress(workspace, domain) {
-      return workspace.hasDomainAndProperties(domain, {'component': 'addresses'}) && !workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'}) && !workspace.hasDomainAndProperties(domain, {'subcomponent': 'diverts'});
-   }
-
-   function isDivert(workspace, domain) {
-      return workspace.hasDomainAndProperties(domain, {'subcomponent': 'diverts'});
-   }
-
-   function isQueue(workspace, domain) {
-      return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
-   }
-
-   ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
-   ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
-   //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
-   //ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
-   //ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
-   //ARTEMIS.module.controller("ARTEMIS.ProducersController", ARTEMIS.ProducersController);
-   //ARTEMIS.module.controller("ARTEMIS.QueuesController", ARTEMIS.QueuesController);
-   //ARTEMIS.module.controller("ARTEMIS.DiagramController", ARTEMIS.DiagramController);
+   ARTEMIS.module.controller("ARTEMIS.PreferencesController", ARTEMIS.PreferencesController);
 
    return ARTEMIS;
+
 }(ARTEMIS || {}));
 
-// Very important!  Add our module to hawtioPluginLoader so it
-// bootstraps our module
-hawtioPluginLoader.addModule(ARTEMIS.pluginName);
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -891,32 +889,357 @@ hawtioPluginLoader.addModule(ARTEMIS.pluginName);
 /**
  * @module ARTEMIS
  */
-
 var ARTEMIS = (function(ARTEMIS) {
 
-  ARTEMIS.SERVER = 'Server Messages';
+    /**
+     * @method AddressController
+     * @param $scope
+     * @param ARTEMISService
+     *
+     * Controller for the Create interface
+     */
+    ARTEMIS.AddressController = function ($scope, workspace, ARTEMISService, jolokia, localStorage) {
+        Core.initPreferenceScope($scope, localStorage, {
+            'routingType': {
+                'value': 0,
+                'converter': parseInt,
+                'formatter': parseInt
+            }
+        });
+        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
+        $scope.workspace = workspace;
+        $scope.message = "";
+        $scope.deleteDialog = false;
+        $scope.$watch('workspace.selection', function () {
+            workspace.moveIfViewInvalid();
+        });
+        function operationSuccess() {
+            $scope.addressName = "";
+            $scope.workspace.operationCounter += 1;
+            Core.$apply($scope);
+            Core.notification("success", $scope.message);
+            $scope.workspace.loadTree();
+        }
+        function deleteSuccess() {
+            // lets set the selection to the parent
+            workspace.removeAndSelectParentNode();
+            $scope.workspace.operationCounter += 1;
+            Core.$apply($scope);
+            Core.notification("success", $scope.message);
+            $scope.workspace.loadTree();
+        }
+        $scope.createAddress = function (name, routingType) {
+            var mbean = getBrokerMBean(jolokia);
+            if (mbean) {
+                if (routingType == 0) {
+                    $scope.message = "Created  Multicast Address " + name;
+                    ARTEMIS.log.info($scope.message);
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "MULTICAST", Core.onSuccess(operationSuccess));
+                }
+                else if (routingType == 1) {
+                    $scope.message = "Created Anycast Address " + name;
+                    ARTEMIS.log.info($scope.message);
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST", Core.onSuccess(operationSuccess));
+                }
+                else {
+                    $scope.message = "Created Anycast/Multicast Address " + name;
+                    ARTEMIS.log.info($scope.message);
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST,MULTICAST", Core.onSuccess(operationSuccess));
+                }
+            }
+        };
+        $scope.deleteAddress = function () {
+            var selection = workspace.selection;
+            var entries = selection.entries;
+            var mbean = getBrokerMBean(jolokia);
+            ARTEMIS.log.info(mbean);
+            if (mbean) {
+                if (selection && jolokia && entries) {
+                    var domain = selection.domain;
+                    var name = entries["address"];
+                    // TODO: Find replacement
+                    //name = name.unescapeHTML();
+                    name = Core.unescapeHTML(name);
+                    if (name.charAt(0) === '"' && name.charAt(name.length -1) === '"')
+                    {
+                        name = name.substr(1,name.length -2);
+                    }
+                    name = ARTEMISService.artemisConsole.ownUnescape(name);
+                    ARTEMIS.log.info(name);
+                    var operation;
+                    $scope.message = "Deleted address " + name;
+                    ARTEMISService.artemisConsole.deleteAddress(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
+                }
+            }
+        };
+        $scope.name = function () {
+            var selection = workspace.selection;
+            if (selection) {
+                return ARTEMISService.artemisConsole.ownUnescape(selection.title);
+            }
+            return null;
+        };
 
-
-  // The ARTEMIS service handles the connection to
-  // the Artemis Jolokia server in the background
-  ARTEMIS.module.factory("ARTEMISService", function(jolokia, $rootScope) {
-    var self = {
-      artemisConsole: undefined,
-
-      getVersion: function(jolokia) {
-        ARTEMIS.log.info("Connecting to ARTEMIS service: " + self.artemisConsole.getServerAttributes(jolokia));
-      } ,
-      initArtemis: function(broker) {
-        ARTEMIS.log.info("*************creating Artemis Console************");
-        self.artemisConsole = new ArtemisConsole();
-      }
+        function getBrokerMBean(jolokia) {
+            var mbean = null;
+            var selection = workspace.selection;
+            var folderNames = selection.folderNames;
+            mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
+            ARTEMIS.log.info("broker=" + mbean);
+            return mbean;
+        }
     };
 
-    return self;
-  });
+    return ARTEMIS;
+} (ARTEMIS || {}));
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @module ARTEMIS
+ */
+var ARTEMIS = (function(ARTEMIS) {
 
-  return ARTEMIS;
-}(ARTEMIS || {}));
+    ARTEMIS.AddressesController = function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
+    //ARTEMIS.module.controller("ARTEMIS.AddressesController", ["$scope", "$location", "workspace", "ARTEMISService", "jolokia", "localStorage", "artemisAddress", function ($scope, $location, workspace, ARTEMISService, jolokia, localStorage, artemisAddress) {
+
+        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
+
+        $scope.$on("$routeChangeSuccess", function (event, current, previous) {
+            // lets do this asynchronously to avoid Error: $digest already in progress
+            setTimeout(updateSelectionFromURL, 50);
+        });
+
+        function updateSelectionFromURL() {
+            //$location.path("jmx/attributes").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
+            Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#artemistree"), function (first) {
+                // use function to auto select the queue folder on the 1st broker
+                var jms = first.getChildren()[0];
+                ARTEMIS.log.info("%%%%%%" + jms);
+                var queues = jms.getChildren()[0];
+                if (queues && queues.data.title === 'Queue') {
+                    first = queues;
+                    first.expand(true);
+                    return first;
+                }
+                return null;
+            }, true);
+        }
+
+        /**
+         *  Required For Each Object Type
+         */
+
+        var objectType = "address";
+        var method = 'listAddresses(java.lang.String, int, int)';
+
+        // TODO: Put the manage column back
+        var attributes = [
+//           {
+//               field: 'manage',
+//               displayName: 'manage',
+//               width: '*',
+//               //cellTemplate: '<div class="ngCellText"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//               //cellTemplate: '<div class="ngCellText"><a href="/jmx/attributes?main-tab=artemis&sub-tab=artemis-attributes&nid=root-org.apache.activemq.artemis-%220.0.0.0%22-addresses-%22{{row.entity.name}}%22-queues-%22anycast%22-%22{{row.entity.name}}%22" ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//               cellTemplate: '<div class="ngCellText"><a href="navigateToAddressAtts(row)"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
+//           },
+           {
+                field: 'id',
+                displayName: 'ID',
+                width: '*'
+            },
+            {
+                field: 'name',
+                displayName: 'Name',
+                width: '*'
+            },
+            {
+                field: 'routingTypes',
+                displayName: 'Routing Types',
+                width: '*',
+                sortable: false
+            },
+            {
+                field: 'queueCount',
+                displayName: 'Queue Count',
+                width: '*',
+                sortable: false
+            }
+        ];
+        $scope.filter = {
+            fieldOptions: [
+                {id: 'ID', name: 'ID'},
+                {id: 'NAME', name: 'Name'},
+                {id: 'ROUTING_TYPES', name: 'Routing Types'},
+                {id: 'QUEUE_COUNT', name: 'Queue Count'},
+            ],
+            operationOptions: [
+                {id: 'EQUALS', name: 'Equals'},
+                {id: 'CONTAINS', name: 'Contains'},
+                {id: 'GREATER_THAN', name: 'Greater Than'},
+                {id: 'LESS_THAN', name: 'Less Than'}
+            ],
+            values: {
+                field: "",
+                operation: "",
+                value: "",
+                sortOrder: "asc",
+                sortBy: "ID"
+            }
+        };
+
+        /**
+         *  Below here is utility.
+         *
+         *  TODO Refactor into new separate files
+         */
+
+
+        if (artemisAddress.address) {
+            $scope.filter.values.field = $scope.filter.fieldOptions[1].id;
+            $scope.filter.values.operation = $scope.filter.operationOptions[0].id;
+            $scope.filter.values.value = artemisAddress.address.address;
+            artemisAddress.address = null;
+        }
+
+        $scope.navigateToAddressAtts = function (row) {
+            $location.path("jmx/attributes").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
+        };
+        $scope.navigateToAddressOps = function (row) {
+            $location.path("jmx/operations").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
+        };
+        $scope.workspace = workspace;
+        $scope.objects = [];
+        $scope.totalServerItems = 0;
+        $scope.pagingOptions = {
+            pageSizes: [50, 100, 200],
+            pageSize: 100,
+            currentPage: 1
+        };
+        $scope.sortOptions = {
+            fields: ["id"],
+            columns: ["id"],
+            directions: ["asc"]
+        };
+        var refreshed = false;
+
+        $scope.gridOptions = {
+            selectedItems: [],
+            data: 'objects',
+            showFooter: true,
+            showFilter: true,
+            showColumnMenu: true,
+            enableCellSelection: false,
+            enableHighlighting: true,
+            enableColumnResize: true,
+            enableColumnReordering: true,
+            selectWithCheckboxOnly: false,
+            showSelectionCheckbox: false,
+            multiSelect: false,
+            displaySelectionCheckbox: false,
+            pagingOptions: $scope.pagingOptions,
+            enablePaging: true,
+            totalServerItems: 'totalServerItems',
+            maintainColumnRatios: false,
+            columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
+            enableFiltering: true,
+            useExternalFiltering: true,
+            sortInfo: $scope.sortOptions,
+            useExternalSorting: true,
+        };
+
+        $scope.refresh = function () {
+            //refreshed = true;
+            $scope.loadTable();
+        };
+        $scope.reset = function () {
+            $scope.filter.values.field = "";
+            $scope.filter.values.operation = "";
+            $scope.filter.values.value = "";
+            $scope.loadTable();
+        };
+        $scope.loadTable = function () {
+        	$scope.filter.values.sortColumn = $scope.sortOptions.fields[0];
+            $scope.filter.values.sortBy = $scope.sortOptions.directions[0];
+	        $scope.filter.values.sortOrder = $scope.sortOptions.directions[0];
+            var mbean = getBrokerMBean(jolokia);
+            if (mbean.includes("undefined")) {
+                onBadMBean();
+            } else if (mbean) {
+                var filter = JSON.stringify($scope.filter.values);
+                console.log("Filter string: " + filter);
+                //jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
+                jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
+            }
+        };
+        function onError() {
+            Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+        }
+        function onBadMBean() {
+            Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
+        }
+        function populateTable(response) {
+            console.log("populateTable with response: " + response);
+            var data = JSON.parse(response.value);
+            //console.log("Got data: ", data);
+            $scope.objects = [];
+            angular.forEach(data["data"], function (value, idx) {
+                $scope.objects.push(value);
+            });
+
+            $scope.totalServerItems = data["count"];
+            console.log("totalServerItems: ", $scope.totalServerItems);
+            $scope.gridOptions.pagingOptions.currentPage = 1;
+//            if (refreshed == true) {
+//                $scope.gridOptions.pagingOptions.currentPage = 1;
+//                refreshed = false;
+//            }
+            Core.$apply($scope);
+        }
+        $scope.$watch('sortOptions', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                $scope.loadTable();
+            }
+        }, true);
+        $scope.$watch('pagingOptions', function (newVal, oldVal) {
+            if (parseInt(newVal.currentPage) && newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+                $scope.loadTable();
+            }
+            if (parseInt(newVal.pageSize) && newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
+                $scope.pagingOptions.currentPage = 1;
+                $scope.loadTable();
+            }
+        }, true);
+
+        function getBrokerMBean(jolokia) {
+            var mbean = null;
+            var selection = workspace.selection;
+            var folderNames = selection.folderNames;
+            mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
+            ARTEMIS.log.info("broker=" + mbean);
+            return mbean;
+        };
+        $scope.refresh();
+    };
+    //}]);
+
+    return ARTEMIS;
+
+} (ARTEMIS || {}));
 
 
 /*
@@ -941,7 +1264,7 @@ var ARTEMIS = (function(ARTEMIS) {
 var ARTEMIS = (function(ARTEMIS) {
    ARTEMIS.BrokerDiagramController = function ($scope, $compile, $location, localStorage, ARTEMISService, jolokia, workspace, $routeParams) {
 
-      Fabric.initScope($scope, $location, jolokia, workspace);
+      //Fabric.initScope($scope, $location, jolokia, workspace);
       var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
 
       $scope.selectedNode = null;
@@ -1076,7 +1399,7 @@ var ARTEMIS = (function(ARTEMIS) {
                $scope.unregisterFn = Core.register(nodeJolokia, $scope, {
                   type: 'read',
                   mbean: mbean
-               }, onSuccess(renderNodeAttributes, {
+               }, Core.onSuccess(renderNodeAttributes, {
                   error: function (response) {
                      // probably we've got a wrong mbean name?
                      // so lets render at least
@@ -1132,16 +1455,17 @@ var ARTEMIS = (function(ARTEMIS) {
                   properties.push({key: Core.humanizeValue(k), value: formattedValue});
                }
             });
-            properties = properties.sortBy("key");
+            // TODO: Reenable sortBy
+            //properties = properties.sortBy("key");
             var brokerProperty = null;
             if (brokerName) {
                var brokerHtml = '<a target="broker" ng-click="connectToBroker()">' + '<img title="Apache Artemis" src="img/icons/messagebroker.svg"> ' + brokerName + '</a>';
-               if (version && profile) {
-                  var brokerLink = Fabric.brokerConfigLink(workspace, jolokia, localStorage, version, profile, brokerName);
-                  if (brokerLink) {
-                     brokerHtml += ' <a title="configuration settings" target="brokerConfig" href="' + brokerLink + '"><i class="icon-tasks"></i></a>';
-                  }
-               }
+//               if (version && profile) {
+//                  var brokerLink = Fabric.brokerConfigLink(workspace, jolokia, localStorage, version, profile, brokerName);
+//                  if (brokerLink) {
+//                     brokerHtml += ' <a title="configuration settings" target="brokerConfig" href="' + brokerLink + '"><i class="icon-tasks"></i></a>';
+//                  }
+//               }
                var html = $compile(brokerHtml)($scope);
                brokerProperty = {key: "Broker", value: html};
                if (!isBroker) {
@@ -1221,7 +1545,7 @@ var ARTEMIS = (function(ARTEMIS) {
             containerId: container
          };
          var brokers = [];
-         jolokia.search(artemisJmxDomain + ":broker=*", onSuccess(function (response) {
+         jolokia.search(artemisJmxDomain + ":broker=*", Core.onSuccess(function (response) {
             angular.forEach(response, function (objectName) {
                var atts = ARTEMISService.artemisConsole.getServerAttributes(jolokia, objectName);
                var val = atts.value;
@@ -1256,11 +1580,11 @@ var ARTEMIS = (function(ARTEMIS) {
             if (containerJolokia) {
                onContainerJolokia(containerJolokia, container, id, brokers);
             }
-            else {
-               Fabric.containerJolokia(jolokia, id, function (containerJolokia) {
-                  return onContainerJolokia(containerJolokia, container, id, brokers);
-               });
-            }
+//            else {
+//               Fabric.containerJolokia(jolokia, id, function (containerJolokia) {
+//                  return onContainerJolokia(containerJolokia, container, id, brokers);
+//               });
+//            }
          });
          $scope.graph = graphBuilder.buildGraph();
          Core.$apply($scope);
@@ -1278,7 +1602,7 @@ var ARTEMIS = (function(ARTEMIS) {
       function onContainerJolokia(containerJolokia, container, id, brokers) {
          function createQueues(brokers) {
             if ($scope.viewSettings.queue) {
-               containerJolokia.search(artemisJmxDomain + ":*,subcomponent=queues", onSuccess(function (response) {
+               containerJolokia.search(artemisJmxDomain + ":*,subcomponent=queues", Core.onSuccess(function (response) {
                   angular.forEach(response, function (objectName) {
                      var details = Core.parseMBean(objectName);
                      if (details) {
@@ -1304,7 +1628,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
          function createAddresses(brokers) {
             if ($scope.viewSettings.address) {
-               containerJolokia.search(artemisJmxDomain + ":*,component=addresses", onSuccess(function (response) {
+               containerJolokia.search(artemisJmxDomain + ":*,component=addresses", Core.onSuccess(function (response) {
                   angular.forEach(response, function (objectName) {
                      var details = Core.parseMBean(objectName);
                      if (details) {
@@ -1330,7 +1654,7 @@ var ARTEMIS = (function(ARTEMIS) {
                mBean = artemisJmxDomain + ":broker=" + broker.brokerId;
                // find consumers
                if ($scope.viewSettings.consumer) {
-                  ARTEMISService.artemisConsole.getConsumers(mBean, containerJolokia, onSuccess(function (properties) {
+                  ARTEMISService.artemisConsole.getConsumers(mBean, containerJolokia, Core.onSuccess(function (properties) {
                      consumers = properties.value;
                      ARTEMIS.log.info(consumers);
                      angular.forEach(angular.fromJson(consumers), function (consumer) {
@@ -1364,7 +1688,7 @@ var ARTEMIS = (function(ARTEMIS) {
                // find networks of brokers
                if ($scope.viewSettings.network && $scope.viewSettings.broker) {
 
-                  ARTEMISService.artemisConsole.getRemoteBrokers(mBean, containerJolokia, onSuccess(function (properties) {
+                  ARTEMISService.artemisConsole.getRemoteBrokers(mBean, containerJolokia, Core.onSuccess(function (properties) {
                      remoteBrokers = properties.value;
 
                      ARTEMIS.log.info("remoteBrokers=" + angular.toJson(remoteBrokers))
@@ -1417,7 +1741,7 @@ var ARTEMIS = (function(ARTEMIS) {
                      }
                   };
                   if (!addressName) {
-                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + addressName + ",subcomponent=queues,routing-type=" + routingType + ",queue=" + queueName + ",*", onSuccess(function (response) {
+                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + addressName + ",subcomponent=queues,routing-type=" + routingType + ",queue=" + queueName + ",*", Core.onSuccess(function (response) {
                         if (response && response.length) {
                            answer.objectName = response[0];
                         }
@@ -1448,7 +1772,7 @@ var ARTEMIS = (function(ARTEMIS) {
                      }
                   };
                   if (!brokerName) {
-                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + destinationName + ",*", onSuccess(function (response) {
+                     containerJolokia.search(artemisJmxDomain + ":broker=" + brokerName + ",component=addresses,address=" + destinationName + ",*", Core.onSuccess(function (response) {
                         if (response && response.length) {
                            answer.objectName = response[0];
                         }
@@ -1726,7 +2050,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : moveSuccess;
-                   ARTEMISService.artemisConsole.moveMessage(mbean, jolokia, id, $scope.queueName, onSuccess(callback));
+                   ARTEMISService.artemisConsole.moveMessage(mbean, jolokia, id, $scope.queueName, Core.onSuccess(callback));
                 }
              });
           }
@@ -1751,7 +2075,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : operationSuccess;
-                   ARTEMISService.artemisConsole.deleteMessage(mbean, jolokia, id, onSuccess(callback));
+                   ARTEMISService.artemisConsole.deleteMessage(mbean, jolokia, id, Core.onSuccess(callback));
                 }
              });
           }
@@ -1767,8 +2091,8 @@ var ARTEMIS = (function(ARTEMIS) {
                 var id = item.messageID;
                 if (id) {
                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : operationSuccess;
-                   jolokia.execute(mbean, operation, id, onSuccess(callback));
-                   ARTEMISService.artemisConsole.retryMessage(mbean, jolokia, id, onSuccess(callback));
+                   jolokia.execute(mbean, operation, id, Core.onSuccess(callback));
+                   ARTEMISService.artemisConsole.retryMessage(mbean, jolokia, id, Core.onSuccess(callback));
                 }
              });
           }
@@ -1950,7 +2274,8 @@ var ARTEMIS = (function(ARTEMIS) {
           }
           else {
              // in case of refresh
-             var key = location.search()['nid'];
+             // TODO: Fix location.search()
+             var key = $location.search()['nid'];
              var node = workspace.keyToNodeMap[key];
              objName = node.objectName;
           }
@@ -1967,8 +2292,8 @@ var ARTEMIS = (function(ARTEMIS) {
              else {
                 onDlq(false);
              }
-             jolokia.request({ type: 'exec', mbean: objName, operation: 'countMessages()'}, onSuccess(function(response) {$scope.totalServerItems = response.value;}));
-             jolokia.request({ type: 'exec', mbean: objName, operation: 'browse(int, int)', arguments: [$scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable));
+             jolokia.request({ type: 'exec', mbean: objName, operation: 'countMessages()'}, Core.onSuccess(function(response) {$scope.totalServerItems = response.value;}));
+             jolokia.request({ type: 'exec', mbean: objName, operation: 'browse(int, int)', arguments: [$scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable));
           }
        }
 
@@ -2270,6 +2595,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.connectionID; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -2544,6 +2870,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -2625,126 +2952,6 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var ARTEMIS;
-(function (ARTEMIS) {
-    ARTEMIS.jmsHeaderSchema = {
-        definitions: {
-            headers: {
-                properties: {
-                    JMSCorrelationID: {
-                        type: "java.lang.String"
-                    },
-                    JMSDeliveryMode: {
-                        "type": "string",
-                        "enum": [
-                            "PERSISTENT",
-                            "NON_PERSISTENT"
-                        ]
-                    },
-                    JMSDestination: {
-                        type: "javax.jms.Destination"
-                    },
-                    JMSExpiration: {
-                        type: "long"
-                    },
-                    JMSPriority: {
-                        type: "int"
-                    },
-                    JMSReplyTo: {
-                        type: "javax.jms.Destination"
-                    },
-                    JMSType: {
-                        type: "java.lang.String"
-                    },
-                    JMSXGroupId: {
-                        type: "java.lang.String"
-                    },
-                    _AMQ_SCHED_DELIVERY: {
-                        type: "java.lang.String"
-                    }
-                }
-            },
-            "javax.jms.Destination": {
-                type: "java.lang.String"
-            }
-        }
-    };
-})(ARTEMIS || (ARTEMIS = {}));
-//# sourceMappingURL=jmsHeaderSchema.js.map
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * @module ARTEMIS
- */
-var ARTEMIS = (function(ARTEMIS) {
-
-   /**
-    * @method PreferencesController
-    * @param $scope
-    *
-    * Controller for the Preferences interface
-    */
-   ARTEMIS.PreferencesController = function ($scope, localStorage, userDetails, $rootScope) {
-      Core.initPreferenceScope($scope, localStorage, {
-         'artemisUserName': {
-            'value': userDetails.username
-         },
-         'artemisPassword': {
-            'value': userDetails.password
-         },
-         'artemisDLQ': {
-            'value': "DLQ"
-         },
-         'artemisExpiryQueue': {
-            'value': "ExpiryQueue"
-         },
-         'artemisBrowseBytesMessages': {
-            'value': 1,
-            'converter': parseInt,
-            'formatter': function (value) {
-               return "" + value;
-            }
-         }
-      });
-   };
-
-   ARTEMIS.module.controller("ARTEMIS.PreferencesController", ARTEMIS.PreferencesController);
-
-   return ARTEMIS;
-
-}(ARTEMIS || {}));
-
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -2908,6 +3115,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -3072,11 +3280,11 @@ var ARTEMIS = (function(ARTEMIS) {
                 $scope.message = "Created queue " + queueName + " durable=" + durable + " filter=" + filter + " on address " + address;
                 if (routingType == 0) {
                     ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "MULTICAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, onSuccess(operationSuccess));
+                    ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "MULTICAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, Core.onSuccess(operationSuccess));
                     ARTEMIS.log.info("executed");
                 } else {
                    ARTEMIS.log.info($scope.message);
-                   ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "ANYCAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, onSuccess(operationSuccess));
+                   ARTEMISService.artemisConsole.createQueue(mbean, jolokia, address, "ANYCAST", queueName, durable, filter, maxConsumers, purgeWhenNoConsumers, Core.onSuccess(operationSuccess));
                    ARTEMIS.log.info("executed");
                 }
             }
@@ -3096,11 +3304,11 @@ var ARTEMIS = (function(ARTEMIS) {
                     var operation;
                     if (isQueue) {
                         $scope.message = "Deleted queue " + name;
-                        ARTEMISService.artemisConsole.deleteQueue(mbean, jolokia, name, onSuccess(deleteSuccess));
+                        ARTEMISService.artemisConsole.deleteQueue(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
                     }
                     else {
                         $scope.message = "Deleted topic " + name;
-                        ARTEMISService.artemisConsole.deleteTopic(mbean, jolokia, name, onSuccess(deleteSuccess));
+                        ARTEMISService.artemisConsole.deleteTopic(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
                     }
                 }
             }
@@ -3112,10 +3320,12 @@ var ARTEMIS = (function(ARTEMIS) {
             if (mbean) {
                 if (selection && jolokia && entries) {
                     var name = entries["Destination"] || entries["destinationName"] || selection.title;
-                    name = name.unescapeHTML();
+                    // TODO: Review if this is required or not
+                    //name = name.unescapeHTML();
+                    name = Core.unescapeHTML(name);
                     var operation = "purge()";
                     $scope.message = "Purged queue " + name;
-                    ARTEMISService.artemisConsole.purgeQueue(mbean, jolokia, onSuccess(deleteSuccess));
+                    ARTEMISService.artemisConsole.purgeQueue(mbean, jolokia, Core.onSuccess(deleteSuccess));
                 }
             }
         };
@@ -3171,12 +3381,13 @@ var ARTEMIS = (function(ARTEMIS) {
         var objectType = "queue";
         var method = 'listQueues(java.lang.String, int, int)';
         var attributes = [
-            {
-                field: 'manage',
-                displayName: 'manage',
-                width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="navigateToQueueAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToQueueOps(row)">operations</a></div>'
-            },
+            // TODO: Reenable manage column
+//            {
+//                field: 'manage',
+//                displayName: 'manage',
+//                width: '*',
+//                cellTemplate: '<div class="ngCellText"><a ng-click="navigateToQueueAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToQueueOps(row)">operations</a></div>'
+//            },
             {
                 field: 'id',
                 displayName: 'ID',
@@ -3376,6 +3587,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -3499,22 +3711,23 @@ var ARTEMIS;
            ARTEMIS.log.info(localStorage['artemisUserName'] + " " + localStorage['artemisPassword']);
             $scope.noCredentials = (Core.isBlank(localStorage['artemisUserName']) || Core.isBlank(localStorage['artemisPassword']));
         };
-        if ($location.path().has('artemis')) {
-            $scope.localStorage = localStorage;
-            $scope.$watch('localStorage.artemisUserName', $scope.checkCredentials);
-            $scope.$watch('localStorage.artemisPassword', $scope.checkCredentials);
-            //prefill if it's a resent
-            if (artemisMessage.message !== null) {
-                $scope.message = artemisMessage.message.bodyText;
-                if (artemisMessage.message.PropertiesText !== null) {
-                    for (var p in artemisMessage.message.StringProperties) {
-                        $scope.headers.push({name: p, value: artemisMessage.message.StringProperties[p]});
-                    }
-                }
-            }
-            // always reset at the end
-            artemisMessage.message = null;
-        }
+        // TODO: Find replacement
+//        if ($location.path().has('artemis')) {
+//            $scope.localStorage = localStorage;
+//            $scope.$watch('localStorage.artemisUserName', $scope.checkCredentials);
+//            $scope.$watch('localStorage.artemisPassword', $scope.checkCredentials);
+//            //prefill if it's a resent
+//            if (artemisMessage.message !== null) {
+//                $scope.message = artemisMessage.message.bodyText;
+//                if (artemisMessage.message.PropertiesText !== null) {
+//                    for (var p in artemisMessage.message.StringProperties) {
+//                        $scope.headers.push({name: p, value: artemisMessage.message.StringProperties[p]});
+//                    }
+//                }
+//            }
+//            // always reset at the end
+//            artemisMessage.message = null;
+//        }
         $scope.openPrefs = function () {
             $location.search('pref', 'Artemis');
             $scope.$emit("hawtioOpenPrefs");
@@ -3534,7 +3747,8 @@ var ARTEMIS;
                 }
             }
         };
-        $scope.codeMirrorOptions = CodeEditor.createEditorSettings(options);
+        // TODO: Find replacement
+        //$scope.codeMirrorOptions = CodeEditor.createEditorSettings(options);
         $scope.addHeader = function () {
             $scope.headers.push({name: "", value: ""});
             // lets set the focus to the last header
@@ -3600,7 +3814,7 @@ var ARTEMIS;
                         });
                         log.info("About to send headers: " + JSON.stringify(headers));
                     }
-                    var callback = onSuccess(onSendCompleteFn);
+                    var callback = Core.onSuccess(onSendCompleteFn);
 
                     ARTEMIS.log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     var user = localStorage["artemisUserName"];
@@ -3610,7 +3824,7 @@ var ARTEMIS;
                         headers = {};
                     }
                     var type = 3;
-                    ARTEMISService.artemisConsole.sendMessage(mbean, jolokia, headers, type, body, durable, user, pwd, callback, onSuccess(callback));
+                    ARTEMISService.artemisConsole.sendMessage(mbean, jolokia, headers, type, body, durable, user, pwd, callback, Core.onSuccess(callback));
 
                 }
             }
@@ -3851,6 +4065,7 @@ var ARTEMIS = (function(ARTEMIS) {
             totalServerItems: 'totalServerItems',
             maintainColumnRatios: false,
             columnDefs: attributes,
+            primaryKeyFn: function (entity) { return entity.id; },
             enableFiltering: true,
             useExternalFiltering: true,
             sortInfo: $scope.sortOptions,
@@ -3932,189 +4147,6 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/// <reference path="artemisPlugin.ts"/>
-var ARTEMIS;
-(function (ARTEMIS) {
-    ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ["$scope", function ($scope) {
-    //ARTEMIS.TreeHeaderController = function ($scope) {
-        $scope.expandAll = function () {
-            Tree.expandAll("#artemistree");
-        };
-        $scope.contractAll = function () {
-            Tree.contractAll("#artemistree");
-        };
-    //};
-    }]);
-    ARTEMIS.module.controller("ARTEMIS.TreeController", ["$scope", "$location", "workspace", "localStorage", function ($scope, $location, workspace, localStorage) {
-        var artemisJmxDomain = localStorage['artemisJmxDomain'] || "org.apache.activemq.artemis";
-        ARTEMIS.log.info("init tree " + artemisJmxDomain);
-        $scope.$on("$routeChangeSuccess", function (event, current, previous) {
-            // lets do this asynchronously to avoid Error: $digest already in progress
-            setTimeout(updateSelectionFromURL, 50);
-        });
-        $scope.$watch('workspace.tree', function () {
-            reloadTree();
-        });
-        $scope.$on('jmxTreeUpdated', function () {
-            reloadTree();
-        });
-        function reloadTree() {
-            ARTEMIS.log.info("workspace tree has changed, lets reload the artemis tree");
-            var children = [];
-            var tree = workspace.tree;
-
-            ARTEMIS.log.info("tree="+tree);
-            if (tree) {
-                var domainName = artemisJmxDomain;
-                var folder = tree.get(domainName);
-
-                ARTEMIS.log.info("folder="+folder);
-                if (folder) {
-                    children = folder.children;
-                }
-                var treeElement = $("#artemistree");
-                Jmx.enableTree($scope, $location, workspace, treeElement, children, true);
-                // lets do this asynchronously to avoid Error: $digest already in progress
-                setTimeout(updateSelectionFromURL, 50);
-            }
-        }
-        function updateSelectionFromURL() {
-            Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#artemistree"), function (first) {
-                // use function to auto select the queue folder on the 1st broker
-                var jms = first.getChildren()[0];
-                ARTEMIS.log.info("%%%%%%" + jms);
-                var queues = jms.getChildren()[0];
-                if (queues && queues.data.title === 'Queue') {
-                    first = queues;
-                    first.expand(true);
-                    return first;
-                }
-                return null;
-            }, true);
-        }
-    }]);
-
-    //ARTEMIS.module.controller("ARTEMIS.TreeHeaderController", ARTEMIS.TreeHeaderController);
-
-})(ARTEMIS || (ARTEMIS = {}));
-/*
- Licensed to the Apache Software Foundation (ASF) under one or more
- contributor license agreements.  See the NOTICE file distributed with
- this work for additional information regarding copyright ownership.
- The ASF licenses this file to You under the Apache License, Version 2.0
- (the "License"); you may not use this file except in compliance with
- the License.  You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- Architecture
- */
-function ArtemisConsole() {
-
-   this.getServerAttributes = function (jolokia, mBean) {
-      var req1 = { type: "read", mbean: mBean};
-      return jolokia.request(req1, {method: "post"});
-   };
-
-   this.createAddress = function (mbean, jolokia, name, routingType,  method) {
-      jolokia.execute(mbean, "createAddress(java.lang.String,java.lang.String)", name, routingType,  method);
-   };
-
-   this.deleteAddress = function (mbean, jolokia, name, method) {
-      jolokia.execute(mbean, "deleteAddress(java.lang.String)", name,  method);
-   };
-
-   this.createQueue = function (mbean, jolokia, address, routingType, name, durable, filter, maxConsumers, purgeWhenNoConsumers, method) {
-      jolokia.execute(mbean, "createQueue(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean,int,boolean,boolean)", address, routingType, name, filter, durable, maxConsumers, purgeWhenNoConsumers, true, method);
-   };
-
-   this.deleteQueue = function (mbean, jolokia, name, method) {
-      jolokia.execute(mbean, "destroyQueue(java.lang.String)", name,  method);
-   };
-
-   this.purgeQueue = function (mbean, jolokia, method) {
-	  jolokia.execute(mbean, "removeAllMessages()", method);
-   };
-
-   this.browse = function (mbean, jolokia, method) {
-      jolokia.request({ type: 'exec', mbean: mbean, operation: 'browse()' }, method);
-   };
-
-   this.deleteMessage = function (mbean, jolokia, id,  method) {
-      ARTEMIS.log.info("executing on " + mbean);
-      jolokia.execute(mbean, "removeMessage(long)", id, method);
-   };
-
-   this.moveMessage = function (mbean, jolokia, id, queueName,  method) {
-      jolokia.execute(mbean, "moveMessage(long,java.lang.String)", id, queueName, method);
-   };
-
-   this.retryMessage = function (mbean, jolokia, id, method) {
-      jolokia.execute(mbean, "retryMessage(java.lang.String)", id,  method);
-   };
-
-   this.sendMessage = function (mbean, jolokia, headers, type, body, durable, user, pwd, method) {
-      jolokia.execute(mbean, "sendMessage(java.util.Map, int, java.lang.String, boolean, java.lang.String, java.lang.String)", headers, type, body, durable, user, pwd,  method);
-   };
-
-   this.getConsumers = function (mbean, jolokia, method) {
-      jolokia.request({ type: 'exec', mbean: mbean, operation: 'listAllConsumersAsJSON()' }, method);
-   };
-
-   this.getRemoteBrokers = function (mbean, jolokia, method) {
-      jolokia.request({ type: 'exec', mbean: mbean, operation: 'listNetworkTopology()' }, method);
-   };
-
-   this.ownUnescape = function (name) {
-      //simple return unescape(name); does not work for this :(
-      return name.replace(/\\\\/g, "\\").replace(/\\\*/g, "*").replace(/\\\?/g, "?");
-   };
-}
-
-function getServerAttributes() {
-   var console = new ArtemisConsole();
-   return console.getVersion(new Jolokia("http://localhost:8161/jolokia/"));
-}
-
-
-
-
-
-var UIBootstrap;
-(function (UIBootstrap) {
-    var pluginName = "hawtio-ui-bootstrap";
-    angular.module(pluginName, ["ui.bootstrap"]);
-    hawtioPluginLoader.addModule(pluginName);
-    hawtioPluginLoader.addModule("hawtio-compat.transition");
-    hawtioPluginLoader.addModule("hawtio-compat.dialog");
-    hawtioPluginLoader.addModule("hawtio-compat.modal");
-})(UIBootstrap || (UIBootstrap = {}));
-
-
-
-
-
 angular.module("hawtio-artemis-template", []).run(["$templateCache", function($templateCache) {$templateCache.put("plugins/artemis/html/addresses.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<div ng-controller=\"ARTEMIS.AddressesController\">\n\n    <!-- TODO This should be templated and included -->\n    <div class=\"row-fluid\">\n        <div class=\"span24\">\n            <div class=\"control-group inline-block\">\n                <form class=\"form-inline no-bottom-margin\">\n                    &nbsp;<span class=\"label label-default\">Filter</span>\n                    &nbsp;&nbsp;\n                    <select ng-model=\"filter.values.field\" id=\"filter.values.field\">\n                        <option ng-repeat=\"option in filter.fieldOptions\" value=\"{{option.id}}\">{{option.name}}\n                        </option>\n                    </select>\n                    <select ng-model=\"filter.values.operation\" id=\"filter.values.operation\">\n                        <option ng-repeat=\"option in filter.operationOptions\" value=\"{{option.id}}\">{{option.name}}\n                        </option>\n                    </select>\n                    <input class=\"search-query\" type=\"text\" ng-model=\"filter.values.value\" placeholder=\"Value\">\n                    <button class=\"btn\" ng-click=\"refresh()\"\n                            title=\"Filter\">\n                        <i class=\"glyphicon-search\">&nbsp;&nbsp;</i>\n                    </button>\n                    &nbsp;&nbsp;\n                    <button class=\"btn pull-right\" ng-click=\"reset()\"\n                            title=\"Reset\">\n                        <i class=\"icon-refresh\">&nbsp;&nbsp;Reset</i>\n                    </button>\n                </form>\n            </div>\n        </div>\n    </div>\n\n    <div-- class=\"row-fluid\">\n        <!--div class=\"gridStyle\" ng-grid=\"gridOptions\" ui-grid-resize-columns</div-->\n        <table class=\"table table-striped table-bordered table-hover activemq-browse-table\" hawtio-simple-table=\"gridOptions\"></table>\n    </div>\n\n</div>");
 $templateCache.put("plugins/artemis/html/artemisLayout.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<script type=\"text/ng-template\" id=\"header\">\n  <div class=\"tree-header\" ng-controller=\"ARTEMIS.TreeHeaderController\">\n    <div class=\"left\">\n    </div>\n    <div class=\"right\">\n      <i class=\"fa fa-chevron-down clickable\"\n         title=\"Expand all nodes\"\n         ng-click=\"expandAll()\"></i>\n      <i class=\"fa fa-chevron-up clickable\"\n         title=\"Unexpand all nodes\"\n         ng-click=\"contractAll()\"></i>\n    </div>\n  </div>\n</script>\n<hawtio-pane position=\"left\" width=\"300\" header=\"header\">\n  <div id=\"tree-container\"\n       ng-controller=\"Jmx.MBeansController\">\n    <div id=\"artemistree\"\n         ng-controller=\"ARTEMIS.TreeController\"></div>\n  </div>\n</hawtio-pane>\n<div class=\"row-fluid\">\n  <!--\n  <ul class=\"nav nav-tabs\" ng-controller=\"Core.NavBarController\" hawtio-auto-dropdown>\n    <li ng-repeat=\"nav in subLevelTabs track by $index | orderBy:index\" ng-show=\"isValid(nav)\" ng-class=\"{active : isActive(nav)}\">\n      <a ng-href=\"{{nav.href()}}{{hash}}\" title=\"{{nav.title}}\"\n         data-placement=\"bottom\" ng-bind-html-unsafe=\"nav.content\">\n      </a>\n    </li>\n\n    <li class=\"pull-right\">\n      <a ng-href=\"{{fullScreenLink()}}\" title=\"Show this view in full screen\" data-placement=\"bottom\">\n        <i class=\"icon-fullscreen\"></i>\n      </a>\n    </li>\n    <li class=\"pull-right\">\n      <a ng-href=\"{{addToDashboardLink()}}\" title=\"Add this view to a dashboard\" data-placement=\"bottom\">\n        <i class=\"icon-share\"></i>\n      </a>\n    </li>\n    <li class=\"pull-right dropdown overflow\" style=\"visibility: hidden;\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\"><i class=\"icon-chevron-down\"></i></a>\n      <ul class=\"dropdown-menu right\"></ul>\n    </li>\n-->\n\n  </ul>\n\n  <div id=\"properties\" ng-view></div>\n</div>\n");
 $templateCache.put("plugins/artemis/html/brokerDiagram.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<style type=\"text/css\">\n\n.span4.node-panel {\n  margin-top: 10px;\n  margin-left: 10px;\n  width: 33%;\n}\n.node-attributes dl {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.node-attributes dt {\n  width: 150px;\n}\n.node-attributes dd {\n  margin-left: 160px;\n}\n.node-attributes dd a {\n  /** lets make the destination links wrap */\n  -ms-word-break: break-all;\n  word-break: break-all;\n  -webkit-hyphens: auto;\n  -moz-hyphens: auto;\n  hyphens: auto;\n}\n\nul.viewMenu li {\n  padding-left: 10px;\n  padding-top: 2px;\n  padding-bottom: 2px;\n}\n\ndiv#pop-up {\n  display: none;\n  position: absolute;\n  color: white;\n  font-size: 14px;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 5px 10px 5px 10px;\n  -moz-border-radius: 8px 8px;\n  border-radius: 8px 8px;\n}\n\ndiv#pop-up-title {\n  font-size: 15px;\n  margin-bottom: 4px;\n  font-weight: bolder;\n}\n\ndiv#pop-up-content {\n  font-size: 12px;\n}\n\nrect.graphbox {\n  fill: #FFF;\n}\n\nrect.graphbox.frame {\n  stroke: #222;\n  stroke-width: 2px\n}\n\n/* only things directly related to the network graph should be here */\n\npath.link {\n  fill: none;\n  stroke: #666;\n  stroke-width: 1.5px;  b\n}\n\nmarker.broker {\n  stroke: red;\n  fill: red;\n  stroke-width: 1.5px;\n}\n\ncircle.broker {\n  fill: #0c0;\n}\n\ncircle.brokerSlave {\n  fill: #c00;\n}\n\ncircle.notActive {\n  fill: #c00;\n}\n\npath.link.group {\n  stroke: #ccc;\n}\n\nmarker#group {\n  stroke: #ccc;\n  fill: #ccc;\n}\n\ncircle.group {\n  fill: #eee;\n  stroke: #ccc;\n}\n\ncircle.destination {\n  fill: #bbb;\n  stroke: #ccc;\n}\n\ncircle.pinned {\n  stroke-width: 4.5px;\n}\n\npath.link.profile {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\nmarker#container {\n}\n\ncircle.container {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\npath.link.container {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\ncircle {\n  fill: #ccc;\n  stroke: #333;\n  stroke-width: 1.5px;\n  cursor: pointer;\n}\n\ncircle.closeMode {\n  cursor: crosshair;\n}\n\npath.link.destination {\n  stroke: #ccc;\n}\n\ncircle.topic {\n  fill: #c0c;\n}\n\ncircle.queue {\n  fill: #00c;\n}\n\ncircle.consumer {\n  fill: #cfc;\n}\n\ncircle.producer {\n  fill: #ccf;\n}\n\npath.link.producer {\n  stroke: #ccc;\n}\n\npath.link.consumer {\n  stroke: #ccc;\n}\n\npath.link.network {\n  stroke: #ccc;\n}\n\ncircle.selected {\n  stroke-width: 3px;\n}\n\n.selected {\n  stroke-width: 3px;\n}\n\ntext {\n  font: 10px sans-serif;\n  pointer-events: none;\n}\n\ntext.shadow {\n  stroke: #fff;\n  stroke-width: 3px;\n  stroke-opacity: .8;\n}\n</style>\n\n\n<div class=\"row-fluid mq-page\" ng-controller=\"ARTEMIS.BrokerDiagramController\">\n\n  <div ng-hide=\"inDashboard\" class=\"span12 page-padded\">\n    <div class=\"section-header\">\n\n      <div class=\"section-filter\">\n        <input type=\"text\" class=\"search-query\" placeholder=\"Filter...\" ng-model=\"searchFilter\">\n        <i class=\"icon-remove clickable\" title=\"Clear filter\" ng-click=\"searchFilter = \'\'\"></i>\n      </div>\n\n      <div class=\"section-controls\">\n        <a href=\"#\"\n           class=\"dropdown-toggle\"\n           data-toggle=\"dropdown\">\n          View &nbsp;<i class=\"icon-caret-down\"></i>\n        </a>\n\n        <ul class=\"dropdown-menu viewMenu\">\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.consumer\"> Consumers\n            </label>\n          </li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.producer\"> Producers\n            </label>\n          </li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.address\"> Addresses\n            </label>\n          </li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.queue\"> Queues\n            </label>\n          </li>\n          <li class=\"divider\"></li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.broker\"> Brokers\n            </label>\n          </li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.slave\"> Slave brokers\n            </label>\n          </li>\n          <li>\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.network\"> Networks\n            </label>\n          </li>\n          <li class=\"divider\"></li>\n          <li title=\"Should we show the details panel on the left\">\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.panel\"> Details panel\n            </label>\n          </li>\n          <li title=\"Show the summary popup as you hover over nodes\">\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.popup\"> Hover text\n            </label>\n          </li>\n          <li title=\"Show the labels next to nodes\">\n            <label class=\"checkbox\">\n              <input type=\"checkbox\" ng-model=\"viewSettings.label\"> Label\n            </label>\n          </li>\n        </ul>\n\n      </div>\n    </div>\n  </div>\n\n\n  <div id=\"pop-up\">\n    <div id=\"pop-up-title\"></div>\n    <div id=\"pop-up-content\"></div>\n  </div>\n\n  <div class=\"row-fluid\">\n    <div class=\"{{viewSettings.panel ? \'span8\' : \'span12\'}} canvas broker-canvas\">\n      <div hawtio-force-graph graph=\"graph\" selected-model=\"selectedNode\" link-distance=\"150\" charge=\"-600\" nodesize=\"10\" marker-kind=\"marker-end\"\n           style=\"min-height: 800px\">\n      </div>\n    </div>\n    <div ng-show=\"viewSettings.panel\" class=\"span4 node-panel\">\n      <div ng-show=\"selectedNode\" class=\"node-attributes\">\n        <dl ng-repeat=\"property in selectedNodeProperties\" class=\"dl-horizontal\">\n          <dt title=\"{{property.key}}\">{{property.key}}:</dt>\n          <dd ng-bind-html-unsafe=\"property.value\"></dd>\n        </dl>\n      </div>\n    </div>\n  </div>\n\n  <div ng-include=\"\'app/fabric/html/connectToContainerDialog.html\'\"></div>\n\n</div>\n\n\n");

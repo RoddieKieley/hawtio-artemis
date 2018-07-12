@@ -62,17 +62,17 @@ var ARTEMIS = (function(ARTEMIS) {
                 if (routingType == 0) {
                     $scope.message = "Created  Multicast Address " + name;
                     ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "MULTICAST", onSuccess(operationSuccess));
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "MULTICAST", Core.onSuccess(operationSuccess));
                 }
                 else if (routingType == 1) {
                     $scope.message = "Created Anycast Address " + name;
                     ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST", onSuccess(operationSuccess));
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST", Core.onSuccess(operationSuccess));
                 }
                 else {
                     $scope.message = "Created Anycast/Multicast Address " + name;
                     ARTEMIS.log.info($scope.message);
-                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST,MULTICAST", onSuccess(operationSuccess));
+                    ARTEMISService.artemisConsole.createAddress(mbean, jolokia, name, "ANYCAST,MULTICAST", Core.onSuccess(operationSuccess));
                 }
             }
         };
@@ -85,7 +85,9 @@ var ARTEMIS = (function(ARTEMIS) {
                 if (selection && jolokia && entries) {
                     var domain = selection.domain;
                     var name = entries["address"];
-                    name = name.unescapeHTML();
+                    // TODO: Find replacement
+                    //name = name.unescapeHTML();
+                    name = Core.unescapeHTML(name);
                     if (name.charAt(0) === '"' && name.charAt(name.length -1) === '"')
                     {
                         name = name.substr(1,name.length -2);
@@ -94,7 +96,7 @@ var ARTEMIS = (function(ARTEMIS) {
                     ARTEMIS.log.info(name);
                     var operation;
                     $scope.message = "Deleted address " + name;
-                    ARTEMISService.artemisConsole.deleteAddress(mbean, jolokia, name, onSuccess(deleteSuccess));
+                    ARTEMISService.artemisConsole.deleteAddress(mbean, jolokia, name, Core.onSuccess(deleteSuccess));
                 }
             }
         };
