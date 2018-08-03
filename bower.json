@@ -36,12 +36,6 @@
     "angular-bootstrap": "~0.13.0"
   },
   "overrides": {
-    "bootstrap": {
-      "main": [
-        "dist/css/bootstrap.css",
-        "dist/js/bootstrap.js"
-      ]
-    }
   },
   "resolutions": {
     "jquery": "~2.1.0"

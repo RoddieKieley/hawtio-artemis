@@ -240,7 +240,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.push({
             id: 'artemis-create-address',
-            title: function() { return '<i class="icon-plus"></i> Create' },
+            title: function() { return '<i class="fa fa-plus"></i> Create' },
             tooltip: function() { return "Create a new address" },
             show: function() { return isBroker(workspace, artemisJmxDomain) || isAddressFolder(workspace, artemisJmxDomain); },
             href: function() { return "/artemis/createAddress" }
@@ -248,7 +248,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.push({
          id: 'artemis-delete-address',
-         title: function() { return '<i class="icon-remove"></i> Delete' },
+         title: function() { return '<i class="fa fa-remove"></i> Delete' },
          tooltip: function() { return "Delete an address" },
          index: 4,
          show: function () { return isAddress(workspace, artemisJmxDomain); },
@@ -257,7 +257,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.push({
          id: 'artemis-create-queue',
-         title: function() { return '<i class="icon-plus"></i> Create' },
+         title: function() { return '<i class="fa fa-plus"></i> Create' },
          tooltip: function() { return "Create a new queue" },
          show: function () { return isAddress(workspace, artemisJmxDomain) },
          href: function () { return "/artemis/createQueue" }
@@ -265,7 +265,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
         subLevelTabs.push({
            id: 'artemis-delete-queue',
-           title: function() { return '<i class="icon-remove"></i> Delete' },
+           title: function() { return '<i class="fa fa-remove"></i> Delete' },
            tooltip: function() { return "Delete or purge this queue" },
            show: function () { return isQueue(workspace, artemisJmxDomain); },
            href: function () { return "/artemis/deleteQueue" }
@@ -273,7 +273,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
         subLevelTabs.push({
          id: 'artemis-browse-queue',
-           title: function() { return '<i class="icon-envelope"></i> Browse' },
+           title: function() { return '<i class="fa fa-envelope"></i> Browse' },
            tooltip: function() { return "Browse the messages on the queue" },
            show: function () { return isQueue(workspace, artemisJmxDomain); },
            href: function () { return "/artemis/browseQueue" + workspace.hash(); }
@@ -281,7 +281,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.push({
          id: 'artemis-send-message',
-         title: function() { return '<i class="icon-pencil"></i> Send' },
+         title: function() { return '<i class="fa fa-pencil"></i> Send' },
          tooltip: function() { return "Send a message to this address" },
          show: function () { return isAddress(workspace, artemisJmxDomain) || isQueue(workspace, artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sendMessage"; else return  "/jmx/sendMessage";}
@@ -290,7 +290,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-view-diagram',
-         title: function() { return '<i class="icon-picture"></i> Diagram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|' },
+         title: function() { return '<i class="fa fa-picture-o"></i> Diagram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|' },
          tooltip: function() { return "View a diagram of the producers, destinations and consumers" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/diagram"; else return  "/jmx/diagram";}
@@ -298,7 +298,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-queues',
-         title: function() { return '<i class="icon-th-list"></i> Queues' },
+         title: function() { return '<i class="fa fa-th-list"></i> Queues' },
          tooltip: function() { return "Manage Queues" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/queues"; else return  "/jmx/queues"; }
@@ -306,7 +306,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-addresses',
-         title: function() { return '<i class="icon-book"></i> Addresses' },
+         title: function() { return '<i class="fa fa-book"></i> Addresses' },
          tooltip: function() { return "Manage Addresses" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/addresses"; else return  "/artemis/addresses"; }
@@ -314,7 +314,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-producers',
-         title: function() { return '<i class="icon-upload-alt"></i> Producers' },
+         title: function() { return '<i class="fa fa-upload"></i> Producers' },
          tooltip: function() { return "Manage Producers" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/producers"; else return  "/jmx/producers"; }
@@ -322,7 +322,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-consumers',
-         title: function() { return '<i class="icon-download-alt"></i> Consumers' },
+         title: function() { return '<i class="fa fa-download"></i> Consumers' },
          tooltip: function() { return "Manage Consumers" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/consumers"; else return  "/jmx/consumers"; }
@@ -330,7 +330,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-sessions',
-         title: function() { return '<i class="icon-tasks"></i> Sessions' },
+         title: function() { return '<i class="fa fa-tasks"></i> Sessions' },
          tooltip: function() { return "Manage Sessions" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/sessions"; else return  "/jmx/sessions"; }
@@ -338,7 +338,7 @@ var ARTEMIS = (function(ARTEMIS) {
 
       subLevelTabs.unshift({
          id: 'artemis-manage-connections',
-         title: function() { return '<i class="icon-signal"></i> Connections' },
+         title: function() { return '<i class="fa fa-signal"></i> Connections' },
          tooltip: function() { return "Manage Connections" },
          show: function () { return workspace.isTopTabActive("artemis") || workspace.selectionHasDomain(artemisJmxDomain); },
          href: function () { if (workspace.isTopTabActive("artemis")) return "/artemis/connections"; else return  "/jmx/connections"; }
@@ -370,16 +370,6 @@ var ARTEMIS = (function(ARTEMIS) {
    function isQueue(workspace, domain) {
       return workspace.hasDomainAndProperties(domain, {'subcomponent': 'queues'});
    }
-
-   // TODO: Review if it is better to do this here or use the angular allowGlobals which is not recommended
-   //ARTEMIS.module.controller("ARTEMIS.AddressController", ARTEMIS.AddressController);
-   //ARTEMIS.module.controller("ARTEMIS.AddressesController", ARTEMIS.AddressesController);
-   //ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
-   //ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
-   //ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
-   //ARTEMIS.module.controller("ARTEMIS.ProducersController", ARTEMIS.ProducersController);
-   //ARTEMIS.module.controller("ARTEMIS.QueuesController", ARTEMIS.QueuesController);
-   //ARTEMIS.module.controller("ARTEMIS.DiagramController", ARTEMIS.DiagramController);
 
    return ARTEMIS;
 }(ARTEMIS || {}));
