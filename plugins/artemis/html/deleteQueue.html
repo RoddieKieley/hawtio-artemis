@@ -42,6 +42,7 @@
 
   <div hawtio-confirm-dialog="deleteDialog"
        ok-button-text="Delete"
+       cancel-button-text="Cancel"
        on-ok="deleteDestination(true)">
     <div class="dialog-body">
       <p>You are about to delete the <b>{{name()}}</b> queue</p>
@@ -51,6 +52,7 @@
 
   <div hawtio-confirm-dialog="purgeDialog"
        ok-button-text="Purge"
+       cancel-button-text="Cancel"
        on-ok="purgeDestination()">
     <div class="dialog-body">
       <p>You are about to purge the <b>{{name()}}</b> queue</p>
