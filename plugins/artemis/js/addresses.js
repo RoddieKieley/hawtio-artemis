@@ -29,7 +29,9 @@ var ARTEMIS = (function(ARTEMIS) {
             setTimeout(updateSelectionFromURL, 50);
         });
 
+
         function updateSelectionFromURL() {
+            // TODO: Need to get the nid updating properly
             //$location.path("jmx/attributes").search({"tab": "artemis", "nid": ARTEMIS.getAddressNid(row.entity, $location)});
             Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#artemistree"), function (first) {
                 // use function to auto select the queue folder on the 1st broker
@@ -52,16 +54,13 @@ var ARTEMIS = (function(ARTEMIS) {
         var objectType = "address";
         var method = 'listAddresses(java.lang.String, int, int)';
 
-        // TODO: Put the manage column back
         var attributes = [
-//           {
-//               field: 'manage',
-//               displayName: 'manage',
-//               width: '*',
-//               //cellTemplate: '<div class="ngCellText"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
-//               //cellTemplate: '<div class="ngCellText"><a href="/jmx/attributes?main-tab=artemis&sub-tab=artemis-attributes&nid=root-org.apache.activemq.artemis-%220.0.0.0%22-addresses-%22{{row.entity.name}}%22-queues-%22anycast%22-%22{{row.entity.name}}%22" ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
-//               cellTemplate: '<div class="ngCellText"><a href="navigateToAddressAtts(row)"><a ng-click="navigateToAddressAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToAddressOps(row)">operations</a></div>'
-//           },
+           {
+               field: 'manage',
+               displayName: 'manage',
+               width: '*',
+               cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.navigateToAddressAtts(row)">attributes</a>&nbsp;<a href="" ng-click="row.entity.navigateToAddressOps(row)">operations</a></div>'
+           },
            {
                 field: 'id',
                 displayName: 'ID',
@@ -188,7 +187,6 @@ var ARTEMIS = (function(ARTEMIS) {
             } else if (mbean) {
                 var filter = JSON.stringify($scope.filter.values);
                 console.log("Filter string: " + filter);
-                //jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, onSuccess(populateTable, { error: onError }));
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
@@ -206,6 +204,10 @@ var ARTEMIS = (function(ARTEMIS) {
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+            angular.forEach($scope.objects, function (address) {
+              address.navigateToAddressOps = $scope.navigateToAddressOps;
+              address.navigateToAddressAtts = $scope.navigateToAddressAtts;
+            })
 
             $scope.totalServerItems = data["count"];
             console.log("totalServerItems: ", $scope.totalServerItems);

@@ -39,7 +39,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 field: 'connectionID',
                 displayName: 'Connection',
                 width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectConnection(row)">{{row.entity.connectionID}}</a></div>'
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectConnection(row)">{{row.entity.connectionID}}</a></div>'
             },
             {
                 field: 'user',
@@ -50,13 +50,13 @@ var ARTEMIS = (function(ARTEMIS) {
                 field: 'consumerCount',
                 displayName: 'Consumer Count',
                 width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectConsumers(row)">{{row.entity.consumerCount}}</a></div>'
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectConsumers(row)">{{row.entity.consumerCount}}</a></div>'
             },
             {
                 field: 'producerCount',
                 displayName: 'Producer Count',
                 width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectProducers(row)">{{row.entity.producerCount}}</a></div>'
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectProducers(row)">{{row.entity.producerCount}}</a></div>'
             },
             {
                 field: 'creationTime',
@@ -232,6 +232,11 @@ var ARTEMIS = (function(ARTEMIS) {
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+            angular.forEach($scope.objects, function (session) {
+              session.selectConnection = $scope.selectConnection;
+              session.selectConsumers = $scope.selectConsumers;
+              session.selectProducers = $scope.selectProducers;
+            })
             $scope.totalServerItems = data["count"];
             if (refreshed == true) {
                 $scope.gridOptions.pagingOptions.currentPage = 1;

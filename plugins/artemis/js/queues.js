@@ -30,13 +30,12 @@ var ARTEMIS = (function(ARTEMIS) {
         var objectType = "queue";
         var method = 'listQueues(java.lang.String, int, int)';
         var attributes = [
-            // TODO: Reenable manage column
-//            {
-//                field: 'manage',
-//                displayName: 'manage',
-//                width: '*',
-//                cellTemplate: '<div class="ngCellText"><a ng-click="navigateToQueueAtts(row)">attributes</a>&nbsp;<a ng-click="navigateToQueueOps(row)">operations</a></div>'
-//            },
+            {
+                field: 'manage',
+                displayName: 'manage',
+                width: '*',
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.navigateToQueueAtts(row)">attributes</a>&nbsp;<a href="" ng-click="row.entity.navigateToQueueOps(row)">operations</a></div>'
+            },
             {
                 field: 'id',
                 displayName: 'ID',
@@ -277,6 +276,10 @@ var ARTEMIS = (function(ARTEMIS) {
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+            angular.forEach($scope.objects, function (queue) {
+              queue.navigateToQueueAtts = $scope.navigateToQueueAtts;
+              queue.navigateToQueueOps = $scope.navigateToQueueOps;
+            })
             $scope.totalServerItems = data["count"];
             if (refreshed == true) {
                 $scope.gridOptions.pagingOptions.currentPage = 1;

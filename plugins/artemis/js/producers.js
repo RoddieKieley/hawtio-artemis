@@ -40,7 +40,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 displayName: 'Session',
                 width: '*',
                 sortable: false,
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectSession(row)">{{row.entity.session}}</a></div>'
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectSession(row)">{{row.entity.session}}</a></div>'
             },
             {
                 field: 'clientID',
@@ -64,7 +64,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 field: 'address',
                 displayName: 'Address',
                 width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectAddress(row)">{{row.entity.address}}</a></div>'
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectAddress(row)">{{row.entity.address}}</a></div>'
             },
             {
                 field: 'remoteAddress',
@@ -202,6 +202,10 @@ var ARTEMIS = (function(ARTEMIS) {
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+            angular.forEach($scope.objects, function (producer) {
+              producer.selectSession = $scope.selectSession;
+              producer.selectAddress = $scope.selectAddress;
+            })
             $scope.totalServerItems = data["count"];
             if (refreshed == true) {
                 $scope.gridOptions.pagingOptions.currentPage = 1;

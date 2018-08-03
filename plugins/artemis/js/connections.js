@@ -54,7 +54,7 @@ var ARTEMIS = (function(ARTEMIS) {
                 field: 'sessionCount',
                 displayName: 'Session Count',
                 width: '*',
-                cellTemplate: '<div class="ngCellText"><a ng-click="selectSessions(row)">{{row.entity.sessionCount}}</a></div>',
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.selectSessions(row)">{{row.entity.sessionCount}}</a></div>',
                 sortable: false
             },
             {
@@ -213,6 +213,9 @@ var ARTEMIS = (function(ARTEMIS) {
             angular.forEach(data["data"], function (value, idx) {
                 $scope.objects.push(value);
             });
+            angular.forEach($scope.objects, function (connection) {
+              connection.selectSessions = $scope.selectSessions;
+            })
             $scope.totalServerItems = data["count"];
             if (refreshed == true) {
                 $scope.gridOptions.pagingOptions.currentPage = 1;

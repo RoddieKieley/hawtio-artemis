@@ -60,7 +60,7 @@ var ARTEMIS = (function(ARTEMIS) {
              {
                 field: 'messageID',
                 displayName: 'Message ID',
-                cellTemplate: '<div class="ngCellText"><a ng-click="openMessageDialog(row)">{{row.entity.messageID}}</a></div>',
+                cellTemplate: '<div class="ngCellText"><a href="" ng-click="row.entity.openMessageDialog(row)">{{row.entity.messageID}}</a></div>',
                 // for ng-grid
                 width: '10%'
              },
@@ -220,7 +220,8 @@ var ARTEMIS = (function(ARTEMIS) {
              $scope.allMessages = data;
           }
           angular.forEach($scope.allMessages, function (message) {
-             //message.headerHtml = createHeaderHtml(message);
+             message.openMessageDialog = $scope.openMessageDialog;
+             message.headerHtml = createHeaderHtml(message);
              message.bodyText = createBodyText(message);
           });
           filterMessages($scope.gridOptions.filterOptions.filterText);
@@ -297,7 +298,7 @@ var ARTEMIS = (function(ARTEMIS) {
        function createHeaderHtml(message) {
           var headers = createHeaders(message);
           var properties = createProperties(message);
-          var headerKeys = Object.extended(headers).keys();
+          var headerKeys = _.keys(headers);
 
           function sort(a, b) {
              if (a > b)
@@ -307,12 +308,14 @@ var ARTEMIS = (function(ARTEMIS) {
              return 0;
           }
 
-          var propertiesKeys = Object.extended(properties).keys().sort(sort);
-          var propertiesKeys = properties.keys;
+          var propertiesKeys = _.keys(properties).sort(sort);
           var jmsHeaders = headerKeys.filter(function (key) {
              return key.startsWith("JMS");
           }).sort(sort);
-          var remaining = headerKeys.subtract(jmsHeaders, propertiesKeys).sort(sort);
+          //var remaining = headerKeys.subtract(jmsHeaders, propertiesKeys).sort(sort);
+          var remaining = headerKeys.filter(function (key) {
+            return !key.startsWith("JMS");
+          }).sort(sort)
           var buffer = [];
 
           function appendHeader(key) {
