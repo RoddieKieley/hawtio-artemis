@@ -85,7 +85,7 @@ var ARTEMIS = (function(ARTEMIS) {
     *
     * This plugin's angularjs module instance
     */
-   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngResource', 'hawtio-compat.dialog', 'hawtio-compat.transition', 'hawtio-core', 'camel', 'hawtio-ui']);
+   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngSanitize', 'ngResource', 'hawtio-compat.dialog', 'hawtio-compat.transition', 'hawtio-core', 'camel', 'hawtio-ui']);
 
    //https://code.angularjs.org/1.5.11/docs/guide/migration#migrating-from-1-2-to-1-3
     angular.module(ARTEMIS.pluginName).config(['$controllerProvider', function($controllerProvider) {
@@ -94,7 +94,12 @@ var ARTEMIS = (function(ARTEMIS) {
       $controllerProvider.allowGlobals();
     }]);
 
-
+    //http://devdocs.io/angularjs~1.5/api/ng/service/%24sce#show-me-an-example-using-sce-.html
+    angular.module(ARTEMIS.pluginName).config(['$sceProvider', function($sceProvider) {
+      // Completely disable SCE.  For demonstration purposes only!
+      // Do not use in new projects.
+      $sceProvider.enabled(false);
+    }]);
 
    // set up the routing for this plugin, these are referenced by the subleveltabs added below
    ARTEMIS.module.config(function($routeProvider) {

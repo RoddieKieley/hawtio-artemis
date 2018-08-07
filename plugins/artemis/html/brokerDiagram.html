@@ -300,7 +300,7 @@ text.shadow {
       <div ng-show="selectedNode" class="node-attributes">
         <dl ng-repeat="property in selectedNodeProperties" class="dl-horizontal">
           <dt title="{{property.key}}">{{property.key}}:</dt>
-          <dd ng-bind-html-unsafe="property.value"></dd>
+          <dd ng-bind-html="property.value"></dd>
         </dl>
       </div>
     </div>

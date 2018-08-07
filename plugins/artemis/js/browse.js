@@ -104,7 +104,8 @@ var ARTEMIS = (function(ARTEMIS) {
           afterSelectionChange: afterSelectionChange
        };
        $scope.showMessageDetails = false;
-       var ignoreColumns = ["PropertiesText", "BodyPreview", "text"];
+       // openMessageDialog is for the dialog itself so we should skip that guy
+       var ignoreColumns = ["PropertiesText", "BodyPreview", "text", "openMessageDialog"];
        var flattenColumns = ["BooleanProperties", "ByteProperties", "ShortProperties", "IntProperties", "LongProperties", "FloatProperties", "DoubleProperties", "StringProperties"];
        $scope.$watch('workspace.selection', function () {
           if (workspace.moveIfViewInvalid()) {
@@ -295,73 +296,71 @@ var ARTEMIS = (function(ARTEMIS) {
         * For some reason using ng-repeat in the modal dialog doesn't work so lets
         * just create the HTML in code :)
         */
-       function createHeaderHtml(message) {
-          var headers = createHeaders(message);
-          var properties = createProperties(message);
-          var headerKeys = _.keys(headers);
-
-          function sort(a, b) {
-             if (a > b)
-                return 1;
-             if (a < b)
-                return -1;
-             return 0;
-          }
-
-          var propertiesKeys = _.keys(properties).sort(sort);
-          var jmsHeaders = headerKeys.filter(function (key) {
-             return key.startsWith("JMS");
-          }).sort(sort);
-          //var remaining = headerKeys.subtract(jmsHeaders, propertiesKeys).sort(sort);
-          var remaining = headerKeys.filter(function (key) {
-            return !key.startsWith("JMS");
-          }).sort(sort)
-          var buffer = [];
-
-          function appendHeader(key) {
-             var value = headers[key];
-             if (value === null) {
-                value = '';
-             }
-             buffer.push('<tr><td class="propertyName"><span class="green">Header</span> - ' + key + '</td><td class="property-value">' + value + '</td></tr>');
-          }
-
-          function appendProperty(key) {
-             var value = properties[key];
-             if (value === null) {
-                value = '';
-             }
-             buffer.push('<tr><td class="propertyName">' + key + '</td><td class="property-value">' + value + '</td></tr>');
-          }
-
-          jmsHeaders.forEach(appendHeader);
-          remaining.forEach(appendHeader);
-          propertiesKeys.forEach(appendProperty);
-          return buffer.join("\n");
-       }
-
-       function createHeaders(row) {
-          var answer = {};
-          angular.forEach(row, function (value, key) {
-             //if (!ignoreColumns.any(key) && !flattenColumns.any(key)) {
-                answer[Core.escapeHtml(key)] = Core.escapeHtml(value);
-             //}
-          });
-          return answer;
-       }
-
-       function createProperties(row) {
-          ARTEMIS.log.debug("properties: ", row);
-          var answer = {};
-          angular.forEach(row, function (value, key) {
-             //if (!ignoreColumns.any(key) && flattenColumns.any(key)) {
-                angular.forEach(value, function (v2, k2) {
-                   answer['<span class="green">' + key.replace('Properties', ' Property') + '</span> - ' + Core.escapeHtml(k2)] = Core.escapeHtml(v2);
+            function createHeaderHtml(message) {
+                var headers = createHeaders(message);
+                var properties = createProperties(message);
+                var headerKeys = _.keys(headers);
+                function sort(a, b) {
+                    if (a > b)
+                        return 1;
+                    if (a < b)
+                        return -1;
+                    return 0;
+                }
+                var propertiesKeys = _.keys(properties).sort(sort);
+                var jmsHeaders = _.filter(headerKeys, function (key) { return _.startsWith(key, "JMS"); }).sort(sort);
+                var remaining = _.difference(headerKeys, jmsHeaders.concat(propertiesKeys)).sort(sort);
+                var buffer = [];
+                function appendHeader(key) {
+                    var value = headers[key];
+                    if (value === null) {
+                        value = '';
+                    }
+                    buffer.push('<tr><td class="propertyName"><span class="green">Header</span> - ' +
+                        key +
+                        '</td><td class="property-value">' +
+                        value +
+                        '</td></tr>');
+                }
+                function appendProperty(key) {
+                    var value = properties[key];
+                    if (value === null) {
+                        value = '';
+                    }
+                    buffer.push('<tr><td class="propertyName">' +
+                        key +
+                        '</td><td class="property-value">' +
+                        value +
+                        '</td></tr>');
+                }
+                jmsHeaders.forEach(appendHeader);
+                remaining.forEach(appendHeader);
+                propertiesKeys.forEach(appendProperty);
+                return buffer.join("\n");
+            }
+            function createHeaders(row) {
+                //log.debug("headers: ", row);
+                var answer = {};
+                angular.forEach(row, function (value, key) {
+                    if (!_.some(ignoreColumns, function (k) { return k === key; }) && !_.some(flattenColumns, function (k) { return k === key; })) {
+                        answer[_.escape(key)] = _.escape(value);
+                    }
                 });
-             //}
-          });
-          return answer;
-       }
+                return answer;
+            }
+            function createProperties(row) {
+                //log.debug("properties: ", row);
+                var answer = {};
+                angular.forEach(row, function (value, key) {
+                    if (!_.some(ignoreColumns, function (k) { return k === key; }) && _.some(flattenColumns, function (k) { return k === key; })) {
+                        angular.forEach(value, function (v2, k2) {
+                            answer['<span class="green">' + key.replace('Properties', ' Property') + '</span> - ' + _.escape(k2)] = _.escape(v2);
+                        });
+                    }
+                });
+                return answer;
+            }
+
 
        function loadTable() {
           ARTEMIS.log.info("loading table")
