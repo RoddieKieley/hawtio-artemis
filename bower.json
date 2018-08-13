@@ -2,12 +2,7 @@
   "name": "hawtio-artemis",
   "version": "0.2.0",
   "main": [
-    "dist/hawtio-artemis.js",
-    "dist/ui-bootstrap.js",
-    "dist/ui-bootstrap-tpls.js",
-    "dist/transition.js",
-    "dist/dialog.js",
-    "dist/modal.js"
+    "dist/hawtio-artemis.js"
   ],
   "ignore": [
     ".bowerrc",
@@ -28,7 +23,6 @@
     "hawtio-core": "~2.0.0",
     "hawtio-core-navigation": "~2.0.0",
     "hawtio-utilities": "~2.0.0",
-    "hawtio-integration": "~2.2.0",
     "hawtio-preferences": "~2.0.0",
     "angular": "1.5.11",
     "angular-sanitize": "1.5.11",
