@@ -1,6 +1,6 @@
 {
   "name": "hawtio-artemis",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "dependencies": {},
   "scripts": {
     "postinstall": "./node_modules/bower/bin/bower install && gulp bower"
