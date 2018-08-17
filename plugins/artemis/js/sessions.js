@@ -263,7 +263,12 @@ var ARTEMIS = (function(ARTEMIS) {
             var mbean = null;
             var selection = workspace.selection;
             var folderNames = selection.folderNames;
-            mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
+            if (folderNames[1]) {
+                mbean = "" + folderNames[0] + ":broker=" + folderNames[1];
+            }
+            else {
+                mbean = "" + folderNames[0] + ":broker=" + "\"" + selection.title + "\"";
+            }
             ARTEMIS.log.info("broker=" + mbean);
             return mbean;
         };
