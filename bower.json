@@ -1,6 +1,6 @@
 {
   "name": "hawtio-artemis",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "main": [
     "dist/hawtio-artemis.js"
   ],
@@ -33,9 +33,5 @@
   },
   "resolutions": {
     "jquery": "~2.1.0"
-  },
-  "devDependencies": {
-    "bootstrap": "~3.3.1",
-    "patternfly": "~1.1.2"
   }
 }
