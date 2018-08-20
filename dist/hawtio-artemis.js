@@ -147,7 +147,7 @@ var ARTEMIS = (function(ARTEMIS) {
     *
     * This plugin's angularjs module instance
     */
-   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngSanitize', 'ngResource', 'hawtio-core', 'camel', 'hawtio-ui']);
+   ARTEMIS.module = angular.module(ARTEMIS.pluginName, ['ngSanitize', 'ngResource', 'hawtio-core', 'hawtio-ui']);
 
    //https://code.angularjs.org/1.5.11/docs/guide/migration#migrating-from-1-2-to-1-3
     angular.module(ARTEMIS.pluginName).config(['$controllerProvider', function($controllerProvider) {

@@ -3,7 +3,9 @@
   "version": "0.5.0",
   "dependencies": {},
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install && gulp bower"
+    "postinstall": "./node_modules/bower/bin/bower install && gulp bower",
+    "start": "gulp",
+    "build": "gulp build"
   },
   "devDependencies": {
     "URIjs": "^1.16.1",
