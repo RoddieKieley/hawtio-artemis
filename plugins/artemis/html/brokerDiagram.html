@@ -41,6 +41,10 @@
   hyphens: auto;
 }
 
+ul.viewMenu {
+  right: auto;
+}
+
 ul.viewMenu li {
   padding-left: 10px;
   padding-top: 2px;
@@ -218,69 +222,68 @@ text.shadow {
         <i class="fa fa-remove clickable" title="Clear filter" ng-click="searchFilter = ''"></i>
       </div>
 
-      <div class="section-controls">
+      <div class="section-controls dropdown">
         <a href="#"
            class="dropdown-toggle"
            data-toggle="dropdown">
           View &nbsp;<i class="fa fa-caret-down"></i>
         </a>
-
         <ul class="dropdown-menu viewMenu">
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.consumer"> Consumers
             </label>
           </li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.producer"> Producers
             </label>
           </li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.address"> Addresses
             </label>
           </li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.queue"> Queues
             </label>
           </li>
           <li class="divider"></li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.broker"> Brokers
             </label>
           </li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.slave"> Slave brokers
             </label>
           </li>
-          <li>
-            <label class="checkbox">
+          <li class="checkbox">
+            <label>
               <input type="checkbox" ng-model="viewSettings.network"> Networks
             </label>
           </li>
           <li class="divider"></li>
-          <li title="Should we show the details panel on the left">
-            <label class="checkbox">
+          <li class="checkbox" title="Should we show the details panel on the left">
+            <label>
               <input type="checkbox" ng-model="viewSettings.panel"> Details panel
             </label>
           </li>
-          <li title="Show the summary popup as you hover over nodes">
-            <label class="checkbox">
+          <li class="checkbox" title="Show the summary popup as you hover over nodes">
+            <label>
               <input type="checkbox" ng-model="viewSettings.popup"> Hover text
             </label>
           </li>
-          <li title="Show the labels next to nodes">
-            <label class="checkbox">
+          <li class="checkbox" title="Show the labels next to nodes">
+            <label>
               <input type="checkbox" ng-model="viewSettings.label"> Label
             </label>
           </li>
         </ul>
-
       </div>
+
     </div>
   </div>
 
