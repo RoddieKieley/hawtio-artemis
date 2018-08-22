@@ -1189,8 +1189,9 @@ var ARTEMIS = (function(ARTEMIS) {
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -2646,8 +2647,9 @@ var ARTEMIS = (function(ARTEMIS) {
         $scope.selectGridRow = function () {
             $scope.showClose =  $scope.gridOptions.selectedItems.length > 0;
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -2704,6 +2706,7 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.ConnectionsController", ARTEMIS.ConnectionsController);
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -2929,8 +2932,9 @@ var ARTEMIS = (function(ARTEMIS) {
         $scope.selectGridRow = function () {
             $scope.showClose =  $scope.gridOptions.selectedItems.length > 0;
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -2989,6 +2993,7 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.ConsumersController", ARTEMIS.ConsumersController);
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -3181,8 +3186,9 @@ var ARTEMIS = (function(ARTEMIS) {
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -3666,8 +3672,9 @@ var ARTEMIS = (function(ARTEMIS) {
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -3723,6 +3730,7 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.QueuesController", ARTEMIS.QueuesController);
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -4153,11 +4161,12 @@ var ARTEMIS = (function(ARTEMIS) {
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
-        $scope.selectGridRow = function () { 
+        $scope.selectGridRow = function () {
             $scope.showClose =  $scope.gridOptions.selectedItems.length > 0;
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
@@ -4216,6 +4225,7 @@ var ARTEMIS = (function(ARTEMIS) {
 } (ARTEMIS || {}));
 
 ARTEMIS.module.controller("ARTEMIS.SessionsController", ARTEMIS.SessionsController);
+
 angular.module("hawtio-artemis-template", []).run(["$templateCache", function($templateCache) {$templateCache.put("plugins/artemis/html/addresses.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<div ng-controller=\"ARTEMIS.AddressesController\">\n\n    <!-- TODO This should be templated and included -->\n    <div class=\"row-fluid\">\n        <div class=\"span24\">\n            <div class=\"control-group inline-block\">\n                <form class=\"form-inline no-bottom-margin\">\n                    &nbsp;<span class=\"label label-default\">Filter</span>\n                    &nbsp;&nbsp;\n                    <select ng-model=\"filter.values.field\" id=\"filter.values.field\">\n                        <option ng-repeat=\"option in filter.fieldOptions\" value=\"{{option.id}}\">{{option.name}}\n                        </option>\n                    </select>\n                    <select ng-model=\"filter.values.operation\" id=\"filter.values.operation\">\n                        <option ng-repeat=\"option in filter.operationOptions\" value=\"{{option.id}}\">{{option.name}}\n                        </option>\n                    </select>\n                    <input class=\"search-query\" type=\"text\" ng-model=\"filter.values.value\" placeholder=\"Value\">\n                    <button class=\"btn\" ng-click=\"refresh()\"\n                            title=\"Filter\">\n                        <i class=\"fa fa-search\">&nbsp;&nbsp;</i>\n                    </button>\n                    &nbsp;&nbsp;\n                    <button class=\"btn pull-right\" ng-click=\"reset()\"\n                            title=\"Reset\">\n                        <i class=\"fa fa-refresh\">&nbsp;&nbsp;Reset</i>\n                    </button>\n                </form>\n            </div>\n        </div>\n    </div>\n\n    <div-- class=\"row-fluid\">\n        <table class=\"table table-striped table-bordered table-hover activemq-browse-table\" hawtio-simple-table=\"gridOptions\"></table>\n    </div>\n\n</div>");
 $templateCache.put("plugins/artemis/html/artemisLayout.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<script type=\"text/ng-template\" id=\"header\">\n  <div class=\"tree-header\" ng-controller=\"ARTEMIS.TreeHeaderController\">\n    <div class=\"left\">\n    </div>\n    <div class=\"right\">\n      <i class=\"fa fa-chevron-down clickable\"\n         title=\"Expand all nodes\"\n         ng-click=\"expandAll()\"></i>\n      <i class=\"fa fa-chevron-up clickable\"\n         title=\"Unexpand all nodes\"\n         ng-click=\"contractAll()\"></i>\n    </div>\n  </div>\n</script>\n<hawtio-pane position=\"left\" width=\"300\" header=\"header\">\n  <div id=\"tree-container\"\n       ng-controller=\"Jmx.MBeansController\">\n    <div id=\"artemistree\"\n         ng-controller=\"ARTEMIS.TreeController\"></div>\n  </div>\n</hawtio-pane>\n<div class=\"row-fluid\">\n  <!--\n  <ul class=\"nav nav-tabs\" ng-controller=\"Core.NavBarController\" hawtio-auto-dropdown>\n    <li ng-repeat=\"nav in subLevelTabs track by $index | orderBy:index\" ng-show=\"isValid(nav)\" ng-class=\"{active : isActive(nav)}\">\n      <a ng-href=\"{{nav.href()}}{{hash}}\" title=\"{{nav.title}}\"\n         data-placement=\"bottom\" ng-bind-html-unsafe=\"nav.content\">\n      </a>\n    </li>\n\n    <li class=\"pull-right\">\n      <a ng-href=\"{{fullScreenLink()}}\" title=\"Show this view in full screen\" data-placement=\"bottom\">\n        <i class=\"icon-fullscreen\"></i>\n      </a>\n    </li>\n    <li class=\"pull-right\">\n      <a ng-href=\"{{addToDashboardLink()}}\" title=\"Add this view to a dashboard\" data-placement=\"bottom\">\n        <i class=\"icon-share\"></i>\n      </a>\n    </li>\n    <li class=\"pull-right dropdown overflow\" style=\"visibility: hidden;\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\"><i class=\"icon-chevron-down\"></i></a>\n      <ul class=\"dropdown-menu right\"></ul>\n    </li>\n-->\n\n  </ul>\n\n  <div id=\"properties\" ng-view></div>\n</div>\n");
 $templateCache.put("plugins/artemis/html/brokerDiagram.html","<!--\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n  Architecture\n-->\n<style type=\"text/css\">\n\n.span4.node-panel {\n  margin-top: 10px;\n  margin-left: 10px;\n  width: 33%;\n}\n.node-attributes dl {\n  margin-top: 5px;\n  margin-bottom: 10px;\n}\n.node-attributes dt {\n  width: 150px;\n}\n.node-attributes dd {\n  margin-left: 160px;\n}\n.node-attributes dd a {\n  /** lets make the destination links wrap */\n  -ms-word-break: break-all;\n  word-break: break-all;\n  -webkit-hyphens: auto;\n  -moz-hyphens: auto;\n  hyphens: auto;\n}\n\nul.viewMenu {\n  right: auto;\n}\n\nul.viewMenu li {\n  padding-left: 10px;\n  padding-top: 2px;\n  padding-bottom: 2px;\n}\n\ndiv#pop-up {\n  display: none;\n  position: absolute;\n  color: white;\n  font-size: 14px;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 5px 10px 5px 10px;\n  -moz-border-radius: 8px 8px;\n  border-radius: 8px 8px;\n}\n\ndiv#pop-up-title {\n  font-size: 15px;\n  margin-bottom: 4px;\n  font-weight: bolder;\n}\n\ndiv#pop-up-content {\n  font-size: 12px;\n}\n\nrect.graphbox {\n  fill: #FFF;\n}\n\nrect.graphbox.frame {\n  stroke: #222;\n  stroke-width: 2px\n}\n\n/* only things directly related to the network graph should be here */\n\npath.link {\n  fill: none;\n  stroke: #666;\n  stroke-width: 1.5px;  b\n}\n\nmarker.broker {\n  stroke: red;\n  fill: red;\n  stroke-width: 1.5px;\n}\n\ncircle.broker {\n  fill: #0c0;\n}\n\ncircle.brokerSlave {\n  fill: #c00;\n}\n\ncircle.notActive {\n  fill: #c00;\n}\n\npath.link.group {\n  stroke: #ccc;\n}\n\nmarker#group {\n  stroke: #ccc;\n  fill: #ccc;\n}\n\ncircle.group {\n  fill: #eee;\n  stroke: #ccc;\n}\n\ncircle.destination {\n  fill: #bbb;\n  stroke: #ccc;\n}\n\ncircle.pinned {\n  stroke-width: 4.5px;\n}\n\npath.link.profile {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\nmarker#container {\n}\n\ncircle.container {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\npath.link.container {\n  stroke-dasharray: 0, 2 1;\n  stroke: #888;\n}\n\ncircle {\n  fill: #ccc;\n  stroke: #333;\n  stroke-width: 1.5px;\n  cursor: pointer;\n}\n\ncircle.closeMode {\n  cursor: crosshair;\n}\n\npath.link.destination {\n  stroke: #ccc;\n}\n\ncircle.topic {\n  fill: #c0c;\n}\n\ncircle.queue {\n  fill: #00c;\n}\n\ncircle.consumer {\n  fill: #cfc;\n}\n\ncircle.producer {\n  fill: #ccf;\n}\n\npath.link.producer {\n  stroke: #ccc;\n}\n\npath.link.consumer {\n  stroke: #ccc;\n}\n\npath.link.network {\n  stroke: #ccc;\n}\n\ncircle.selected {\n  stroke-width: 3px;\n}\n\n.selected {\n  stroke-width: 3px;\n}\n\ntext {\n  font: 10px sans-serif;\n  pointer-events: none;\n}\n\ntext.shadow {\n  stroke: #fff;\n  stroke-width: 3px;\n  stroke-opacity: .8;\n}\n</style>\n\n\n<div class=\"row-fluid mq-page\" ng-controller=\"ARTEMIS.BrokerDiagramController\">\n\n  <div ng-hide=\"inDashboard\" class=\"span12 page-padded\">\n    <div class=\"section-header\">\n\n      <div class=\"section-filter\">\n        <input type=\"text\" class=\"search-query\" placeholder=\"Filter...\" ng-model=\"searchFilter\">\n        <i class=\"fa fa-remove clickable\" title=\"Clear filter\" ng-click=\"searchFilter = \'\'\"></i>\n      </div>\n\n      <div class=\"section-controls dropdown\">\n        <a href=\"#\"\n           class=\"dropdown-toggle\"\n           data-toggle=\"dropdown\">\n          View &nbsp;<i class=\"fa fa-caret-down\"></i>\n        </a>\n        <ul class=\"dropdown-menu viewMenu\">\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.consumer\"> Consumers\n            </label>\n          </li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.producer\"> Producers\n            </label>\n          </li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.address\"> Addresses\n            </label>\n          </li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.queue\"> Queues\n            </label>\n          </li>\n          <li class=\"divider\"></li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.broker\"> Brokers\n            </label>\n          </li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.slave\"> Slave brokers\n            </label>\n          </li>\n          <li class=\"checkbox\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.network\"> Networks\n            </label>\n          </li>\n          <li class=\"divider\"></li>\n          <li class=\"checkbox\" title=\"Should we show the details panel on the left\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.panel\"> Details panel\n            </label>\n          </li>\n          <li class=\"checkbox\" title=\"Show the summary popup as you hover over nodes\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.popup\"> Hover text\n            </label>\n          </li>\n          <li class=\"checkbox\" title=\"Show the labels next to nodes\">\n            <label>\n              <input type=\"checkbox\" ng-model=\"viewSettings.label\"> Label\n            </label>\n          </li>\n        </ul>\n      </div>\n\n    </div>\n  </div>\n\n\n  <div id=\"pop-up\">\n    <div id=\"pop-up-title\"></div>\n    <div id=\"pop-up-content\"></div>\n  </div>\n\n  <div class=\"row-fluid\">\n    <div class=\"{{viewSettings.panel ? \'span8\' : \'span12\'}} canvas broker-canvas\">\n      <div hawtio-force-graph graph=\"graph\" selected-model=\"selectedNode\" link-distance=\"150\" charge=\"-600\" nodesize=\"10\" marker-kind=\"marker-end\"\n           style=\"min-height: 800px\">\n      </div>\n    </div>\n    <div ng-show=\"viewSettings.panel\" class=\"span4 node-panel\">\n      <div ng-show=\"selectedNode\" class=\"node-attributes\">\n        <dl ng-repeat=\"property in selectedNodeProperties\" class=\"dl-horizontal\">\n          <dt title=\"{{property.key}}\">{{property.key}}:</dt>\n          <dd ng-bind-html=\"property.value\"></dd>\n        </dl>\n      </div>\n    </div>\n  </div>\n\n  <div ng-include=\"\'app/fabric/html/connectToContainerDialog.html\'\"></div>\n\n</div>\n\n\n");

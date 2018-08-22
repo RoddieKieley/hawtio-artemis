@@ -215,11 +215,12 @@ var ARTEMIS = (function(ARTEMIS) {
                 jolokia.request({ type: 'exec', mbean: mbean, operation: method, arguments: [filter, $scope.pagingOptions.currentPage, $scope.pagingOptions.pageSize] }, Core.onSuccess(populateTable, { error: onError }));
             }
         };
-        $scope.selectGridRow = function () { 
+        $scope.selectGridRow = function () {
             $scope.showClose =  $scope.gridOptions.selectedItems.length > 0;
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");

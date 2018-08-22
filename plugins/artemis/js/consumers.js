@@ -223,8 +223,9 @@ var ARTEMIS = (function(ARTEMIS) {
         $scope.selectGridRow = function () {
             $scope.showClose =  $scope.gridOptions.selectedItems.length > 0;
         };
-        function onError() {
+        function onError(response) {
             Core.notification("error", "Could not retrieve " + objectType + " list from Artemis.");
+            ARTEMIS.log.error(response.error);
         }
         function onBadMBean() {
             Core.notification("error", "Could not retrieve " + objectType + " list. Wrong MBean selected.");
