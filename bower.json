@@ -1,29 +1,26 @@
 {
   "name": "hawtio-artemis",
-  "version": "0.5.0",
+  "keywords": [
+    "hawtio"
+  ],
   "main": [
     "dist/hawtio-artemis.js"
   ],
   "ignore": [
-    ".bowerrc",
-    ".jshintrc",
-    "node_modules",
+    "**/.*",
     "libs",
+    "node_modules",
     "gulpfile.js",
-    "karma.conf.js",
     "index.html",
     "package.json",
-    "templates",
-    "hawtio-artemis.js",
-    "!dist/hawtio-artemis.js",
-    "test"
+    "yarn.lock"
   ],
   "dependencies": {
     "hawtio-jmx": "~2.0.0",
     "hawtio-preferences": "~2.0.0",
-    "angular-resource": "~1.5.0"
+    "angular-resource": "1.5.11"
   },
   "resolutions": {
-    "jquery": "~2.1.4"
+    "jquery": "2.1.4"
   }
 }

@@ -350,7 +350,7 @@ var ARTEMIS = (function(ARTEMIS) {
       });
       HawtioNav.add(tab);
 
-      preLogoutTasks.addTask("clearArtemisCredentials", () => {
+      preLogoutTasks.addTask("clearArtemisCredentials", function() {
           localStorage.removeItem('artemisUserName');
           localStorage.removeItem('artemisPassword');
       });

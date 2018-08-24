@@ -66,12 +66,8 @@ gulp.task('clean', ['concat'], function() {
 });
 
 gulp.task('connect', function() {
-  plugins.watch([config.src, config.templates], function() {
-    gulp.start('build');
-  });
-  plugins.watch(['libs/**/*.js', 'libs/**/*.css', 'index.html', 'dist/' + config.js], function() {
-    gulp.start('reload');
-  });
+  gulp.watch([config.src, config.templates], ['build']);
+  gulp.watch(['libs/**/*.js', 'libs/**/*.css', 'index.html', 'dist/' + config.js], ['reload']);
   /*
    * Example of fetching a URL from the environment, in this case for kubernetes
   var kube = uri(process.env.KUBERNETES_MASTER || 'http://localhost:8080');
@@ -86,7 +82,7 @@ gulp.task('connect', function() {
       path: '/jolokia',
       targetPath: '/jolokia'
     }
-    /*  
+    /*
     // proxy to a service, in this case kubernetes
     {
       proto: kube.protocol(),
@@ -108,7 +104,7 @@ gulp.task('connect', function() {
     staticAssets: [{
       path: '/',
       dir: '.'
-   
+
     }],
     fallback: 'index.html',
     liveReload: {
