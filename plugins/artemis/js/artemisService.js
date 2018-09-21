@@ -18,28 +18,30 @@
  * @module ARTEMIS
  */
 
-var ARTEMIS = (function(ARTEMIS) {
+var ARTEMIS = (function (ARTEMIS) {
 
   ARTEMIS.SERVER = 'Server Messages';
 
+  // The ARTEMIS service handles the connection to the Artemis Jolokia server in the background
+  function artemisService() {
+    'ngInject';
 
-  // The ARTEMIS service handles the connection to
-  // the Artemis Jolokia server in the background
-  ARTEMIS.module.factory("ARTEMISService", function(jolokia, $rootScope) {
     var self = {
       artemisConsole: undefined,
 
-      getVersion: function(jolokia) {
+      getVersion: function (jolokia) {
         ARTEMIS.log.info("Connecting to ARTEMIS service: " + self.artemisConsole.getServerAttributes(jolokia));
-      } ,
-      initArtemis: function(broker) {
+      },
+      initArtemis: function (broker) {
         ARTEMIS.log.info("*************creating Artemis Console************");
         self.artemisConsole = new ArtemisConsole();
       }
     };
 
     return self;
-  });
+  };
+
+  ARTEMIS.module.factory('ARTEMISService', artemisService);
 
   return ARTEMIS;
 }(ARTEMIS || {}));

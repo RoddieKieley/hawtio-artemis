@@ -1,17 +1,17 @@
-var gulp = require('gulp'),
-    wiredep = require('wiredep').stream,
-    gulpLoadPlugins = require('gulp-load-plugins'),
-    uri = require('URIjs'),
-    s = require('underscore.string'),
-    hawtio = require('@hawtio/node-backend');
+const templateCache = require('gulp-angular-templatecache');
+const clean = require('gulp-clean');
+const concat = require('gulp-concat');
+const gulp = require('gulp');
+const hawtio = require('@hawtio/node-backend');
+const ngAnnotate = require('gulp-ng-annotate');
+const wiredep = require('wiredep').stream;
+const pkg = require('./package.json');
 
-var plugins = gulpLoadPlugins({ lazy: false });
-var pkg = require('./package.json');
-
-var config = {
-  src:
-  ['plugins/artemis/js/jmsHeaderSchema.js',
+const config = {
+  src: [
+    'plugins/artemis/js/jmsHeaderSchema.js',
     'plugins/artemis/js/artemisPlugin.js',
+    'plugins/artemis/js/artemisInit.js',
     'plugins/artemis/lib/artemis-console.js',
     'plugins/artemis/js/artemisService.js',
     'plugins/artemis/js/artemisHelpers.js',
@@ -28,23 +28,23 @@ var config = {
     'plugins/artemis/js/queues.js',
     'plugins/artemis/js/send.js',
     'plugins/artemis/js/sessions.js',
-    './templates.js'],
+    './templates.js'
+  ],
   templates: 'plugins/**/*.html',
   js: pkg.name + '.js',
   template: pkg.name + '-template.js',
   templateModule: pkg.name + '-template'
 };
 
-gulp.task('bower', function() {
+gulp.task('bower', function () {
   gulp.src('index.html')
-    .pipe(wiredep({
-    }))
+    .pipe(wiredep({}))
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('templates', function() {
+gulp.task('templates', function () {
   return gulp.src(config.templates)
-    .pipe(plugins.angularTemplatecache({
+    .pipe(templateCache({
       filename: 'templates.js',
       root: 'plugins/',
       standalone: true,
@@ -54,52 +54,30 @@ gulp.task('templates', function() {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('concat', ['templates'], function() {
+gulp.task('concat', ['templates'], function () {
   return gulp.src(config.src)
-    .pipe(plugins.concat(config.js))
+    .pipe(concat(config.js))
+    .pipe(ngAnnotate())
     .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('clean', ['concat'], function() {
+gulp.task('clean', ['concat'], function () {
   return gulp.src('./templates.js', { read: false })
-    .pipe(plugins.clean());
+    .pipe(clean());
 });
 
-gulp.task('connect', function() {
+gulp.task('connect', function () {
   gulp.watch([config.src, config.templates], ['build']);
   gulp.watch(['libs/**/*.js', 'libs/**/*.css', 'index.html', 'dist/' + config.js], ['reload']);
-  /*
-   * Example of fetching a URL from the environment, in this case for kubernetes
-  var kube = uri(process.env.KUBERNETES_MASTER || 'http://localhost:8080');
-  console.log("Connecting to Kubernetes on: " + kube);
-  */
 
   hawtio.setConfig({
     port: 2772,
     staticProxies: [
-    {
-      port: 8778,
-      path: '/jolokia',
-      targetPath: '/jolokia'
-    }
-    /*
-    // proxy to a service, in this case kubernetes
-    {
-      proto: kube.protocol(),
-      port: kube.port(),
-      hostname: kube.hostname(),
-      path: '/services/kubernetes',
-      targetPath: kube.path()
-    },
-    // proxy to a jolokia instance
-    {
-      proto: kube.protocol(),
-      hostname: kube.hostname(),
-      port: kube.port(),
-      path: '/jolokia',
-      targetPath: '/hawtio/jolokia'
-    }
-    */
+      {
+        port: 8778,
+        path: '/jolokia',
+        targetPath: '/jolokia'
+      }
     ],
     staticAssets: [{
       path: '/',
@@ -111,30 +89,15 @@ gulp.task('connect', function() {
       enabled: true
     }
   });
-  /*
-   * Example middleware that returns a 404 for templates
-   * as they're already embedded in the js
-  hawtio.use('/', function(req, res, next) {
-          var path = req.originalUrl;
-          // avoid returning these files, they should get pulled from js
-          if (s.startsWith(path, '/plugins/') && s.endsWith(path, 'html')) {
-            console.log("returning 404 for: ", path);
-            res.statusCode = 404;
-            res.end();
-          } else {
-            console.log("allowing: ", path);
-            next();
-          }
-        });
-        */
-  hawtio.listen(function(server) {
+
+  hawtio.listen(function (server) {
     var host = server.address().address;
     var port = server.address().port;
     console.log("started from gulp file at ", host, ":", port);
   });
 });
 
-gulp.task('reload', function() {
+gulp.task('reload', function () {
   gulp.src('.')
     .pipe(hawtio.reload());
 });
